@@ -45,31 +45,37 @@ def _get_secret_key() -> bytes:
     return secret.encode("utf-8")
 
 
+_auth_db_initialized: set = set()
+
+
 def get_auth_db() -> sqlite3.Connection:
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(TENANTS_DIR, exist_ok=True)
-    conn = sqlite3.connect(AUTH_DB_PATH)
+    abs_auth_path = os.path.abspath(AUTH_DB_PATH)
+    os.makedirs(os.path.dirname(abs_auth_path), exist_ok=True)
+    conn = sqlite3.connect(abs_auth_path)
     conn.row_factory = sqlite3.Row
+    if abs_auth_path not in _auth_db_initialized:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT UNIQUE NOT NULL,
+                display_name TEXT NOT NULL,
+                password_hash TEXT,
+                google_sub TEXT UNIQUE,
+                avatar_url TEXT DEFAULT '',
+                db_rel_path TEXT NOT NULL,
+                is_owner INTEGER DEFAULT 0,
+                created_at TEXT NOT NULL
+            );
+        """)
+        conn.commit()
+        _auth_db_initialized.add(abs_auth_path)
     return conn
 
 
 def init_auth_db() -> None:
     conn = get_auth_db()
-    cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            display_name TEXT NOT NULL,
-            password_hash TEXT,
-            google_sub TEXT UNIQUE,
-            avatar_url TEXT DEFAULT '',
-            db_rel_path TEXT NOT NULL,
-            is_owner INTEGER DEFAULT 0,
-            created_at TEXT NOT NULL
-        );
-    """)
-    conn.commit()
     conn.close()
 
 
