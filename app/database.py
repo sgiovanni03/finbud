@@ -1,7 +1,8 @@
 import sqlite3
 import os
 import re
-from typing import List, Dict, Any, Optional
+from contextvars import ContextVar
+from typing import List, Dict, Any, Optional, Set
 from datetime import datetime, date, timedelta
 import calendar
 
@@ -11,11 +12,43 @@ DB_PATH = os.environ.get(
 )
 ACCOUNTS_TXT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "accounts.txt")
 
+# Per-request isolated tenant database path (defaults to primary DB_PATH)
+current_db_path_var: ContextVar[str] = ContextVar("current_db_path", default=DB_PATH)
+_initialized_db_paths: Set[str] = set()
+
+
+def set_current_tenant_db(db_path: str):
+    return current_db_path_var.set(db_path or DB_PATH)
+
+
+def reset_current_tenant_db(token) -> None:
+    current_db_path_var.reset(token)
+
+
+def get_active_db_path() -> str:
+    return current_db_path_var.get() or DB_PATH
+
+
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    active_path = get_active_db_path()
+    os.makedirs(os.path.dirname(os.path.abspath(active_path)), exist_ok=True)
+    conn = sqlite3.connect(active_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
+
+
+def ensure_tenant_db_initialized(db_path: Optional[str] = None):
+    target = os.path.abspath(db_path or get_active_db_path())
+    if target in _initialized_db_paths and os.path.exists(target):
+        return
+    token = set_current_tenant_db(target)
+    try:
+        init_db()
+        _initialized_db_paths.add(target)
+    finally:
+        reset_current_tenant_db(token)
+
 
 def init_db():
     conn = get_db()

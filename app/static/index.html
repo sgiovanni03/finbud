@@ -1,31 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark" data-theme="cyber">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinBud - Financial Buddy & Cash-on-Hand Forecast</title>
+  <title>FinBud — Financial Buddy & Cash-on-Hand Forecast</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    /* ==================== FUTURISTIC THEME ENGINE ==================== */
+    :root, html[data-theme="cyber"] {
+      --bg-obsidian: #030612;
+      --bg-card-top: rgba(11, 20, 42, 0.82);
+      --bg-card-bot: rgba(5, 10, 24, 0.90);
+      --accent-300: 103 232 249;   /* #67e8f9 Neon Cyan */
+      --accent-400: 0 240 255;     /* #00f0ff Hyper Cyan */
+      --accent-500: 6 182 212;     /* #06b6d4 Electric Cyan */
+      --accent-950: 8 32 52;
+      --accent2-300: 216 180 254;  /* #d8b4fe Soft Violet */
+      --accent2-400: 192 132 252;  /* #c084fc Electric Purple */
+      --accent2-500: 139 92 246;   /* #8b5cf6 Neon Violet */
+      --rim-gradient: linear-gradient(90deg, rgba(0, 240, 255, 0.55), rgba(168, 85, 247, 0.45), rgba(0, 240, 255, 0.05));
+      --hero-glow: 0 0 22px rgba(0, 240, 255, 0.32);
+      --mesh-1: rgba(0, 240, 255, 0.13);
+      --mesh-2: rgba(168, 85, 247, 0.11);
+      --mesh-3: rgba(59, 130, 246, 0.08);
     }
+
+    html[data-theme="quantum"] {
+      --bg-obsidian: #050314;
+      --bg-card-top: rgba(18, 12, 46, 0.82);
+      --bg-card-bot: rgba(8, 5, 26, 0.90);
+      --accent-300: 216 180 254;   /* #d8b4fe Lavender */
+      --accent-400: 192 132 252;   /* #c084fc Hyper Violet */
+      --accent-500: 147 51 234;    /* #9333ea Plasma Purple */
+      --accent-950: 28 12 60;
+      --accent2-300: 125 211 252;  /* #7dd3fc Sky Laser */
+      --accent2-400: 56 189 248;   /* #38bdf8 Electric Sky */
+      --accent2-500: 236 72 153;   /* #ec4899 Neon Fuchsia */
+      --rim-gradient: linear-gradient(90deg, rgba(192, 132, 252, 0.6), rgba(236, 72, 153, 0.45), rgba(56, 189, 248, 0.15));
+      --hero-glow: 0 0 24px rgba(192, 132, 252, 0.38);
+      --mesh-1: rgba(168, 85, 247, 0.16);
+      --mesh-2: rgba(236, 72, 153, 0.10);
+      --mesh-3: rgba(56, 189, 248, 0.09);
+    }
+
+    html[data-theme="solar"] {
+      --bg-obsidian: #060508;
+      --bg-card-top: rgba(24, 19, 28, 0.84);
+      --bg-card-bot: rgba(11, 9, 14, 0.92);
+      --accent-300: 253 224 71;    /* #fde047 Solar Flare */
+      --accent-400: 251 191 36;    /* #fbbf24 Cyber Gold */
+      --accent-500: 245 158 11;    /* #f59e0b Amber Core */
+      --accent-950: 46 24 6;
+      --accent2-300: 103 232 249;  /* #67e8f9 Ice Cyan */
+      --accent2-400: 34 211 238;   /* #22d3ee Cyber Cyan */
+      --accent2-500: 234 88 12;    /* #ea580c Molten Orange */
+      --rim-gradient: linear-gradient(90deg, rgba(251, 191, 36, 0.55), rgba(34, 211, 238, 0.35), rgba(251, 191, 36, 0.05));
+      --hero-glow: 0 0 22px rgba(251, 191, 36, 0.32);
+      --mesh-1: rgba(245, 158, 11, 0.13);
+      --mesh-2: rgba(34, 211, 238, 0.08);
+      --mesh-3: rgba(234, 88, 12, 0.07);
+    }
+
+    html[data-theme="matrix"] {
+      --bg-obsidian: #02080d;
+      --bg-card-top: rgba(8, 24, 34, 0.82);
+      --bg-card-bot: rgba(3, 12, 18, 0.92);
+      --accent-300: 110 255 198;   /* #6effc6 Bio Mint */
+      --accent-400: 0 255 163;     /* #00ffa3 Matrix Neon */
+      --accent-500: 16 185 129;    /* #10b981 Emerald Core */
+      --accent-950: 4 38 28;
+      --accent2-300: 103 232 249;
+      --accent2-400: 0 210 255;    /* #00d2ff Telemetry Cyan */
+      --accent2-500: 20 184 166;
+      --rim-gradient: linear-gradient(90deg, rgba(0, 255, 163, 0.55), rgba(0, 210, 255, 0.45), rgba(0, 255, 163, 0.05));
+      --hero-glow: 0 0 22px rgba(0, 255, 163, 0.35);
+      --mesh-1: rgba(0, 255, 163, 0.12);
+      --mesh-2: rgba(0, 210, 255, 0.10);
+      --mesh-3: rgba(16, 185, 129, 0.06);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-obsidian);
+      background-image:
+        radial-gradient(at 12% 0%, var(--mesh-1) 0px, transparent 48%),
+        radial-gradient(at 88% 8%, var(--mesh-2) 0px, transparent 45%),
+        radial-gradient(at 50% 100%, var(--mesh-3) 0px, transparent 55%),
+        radial-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+      background-attachment: fixed;
+      letter-spacing: -0.011em;
+      transition: background-color 0.3s ease;
+    }
+
     .font-mono {
       font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
     }
+
+    .glass-card {
+      position: relative;
+      background: linear-gradient(180deg, var(--bg-card-top) 0%, var(--bg-card-bot) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+    }
+    .glass-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12px;
+      right: 12px;
+      height: 1px;
+      background: var(--rim-gradient);
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    .bento-kpi {
+      position: relative;
+      background: linear-gradient(145deg, var(--bg-card-top) 0%, var(--bg-card-bot) 100%);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .bento-kpi:hover {
+      border-color: rgb(var(--accent-400) / 0.45);
+      box-shadow: 0 10px 28px -6px rgb(var(--accent-400) / 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    /* Neon glow on primary hero figures */
+    #stat-projected-cash, #accounts-banner-total, #nav-today-cash, #detail-stat-calculated-balance {
+      text-shadow: var(--hero-glow);
+    }
+
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .view-animate {
+      animation: viewFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #0f172a;
+      background: rgba(3, 6, 18, 0.6);
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 4px;
+      background: #1e293b;
+      border-radius: 9999px;
     }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgb(var(--accent-500) / 0.6);
+    }
+
     html, body {
       color-scheme: dark;
     }
@@ -36,7 +173,7 @@
     input[type="date"]::-webkit-calendar-picker-indicator {
       cursor: pointer;
       opacity: 0.85;
-      filter: invert(0.85) sepia(0.3) saturate(4) hue-rotate(110deg);
+      filter: invert(0.85) sepia(0.3) saturate(4) hue-rotate(150deg);
       transition: opacity 0.15s ease, transform 0.15s ease;
       padding: 2px;
       border-radius: 4px;
@@ -44,7 +181,15 @@
     input[type="date"]:hover::-webkit-calendar-picker-indicator {
       opacity: 1;
       transform: scale(1.15);
-      background: rgba(16, 185, 129, 0.15);
+      background: rgb(var(--accent-400) / 0.15);
+    }
+
+    /* Sidebar active button styling */
+    .nav-item-active {
+      background: linear-gradient(90deg, rgb(var(--accent-500) / 0.2) 0%, rgb(var(--accent2-500) / 0.05) 100%);
+      color: rgb(var(--accent-300)) !important;
+      border-color: rgb(var(--accent-400) / 0.35) !important;
+      box-shadow: inset 3px 0 0 0 rgb(var(--accent-400)), 0 0 16px -4px rgb(var(--accent-400) / 0.25);
     }
   </style>
   <script>
@@ -53,13 +198,22 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#ecfdf5',
-              100: '#d1fae5',
-              500: '#10b981',
-              600: '#059669',
-              700: '#047857',
-              900: '#064e3b'
+            slate: {
+              850: '#0f172a',
+              925: '#070b16',
+              950: '#030612'
+            },
+            emerald: {
+              300: 'rgb(var(--accent-300) / <alpha-value>)',
+              400: 'rgb(var(--accent-400) / <alpha-value>)',
+              500: 'rgb(var(--accent-500) / <alpha-value>)',
+              950: 'rgb(var(--accent-950) / <alpha-value>)'
+            },
+            teal: {
+              300: 'rgb(var(--accent2-300) / <alpha-value>)',
+              400: 'rgb(var(--accent2-400) / <alpha-value>)',
+              500: 'rgb(var(--accent2-500) / <alpha-value>)',
+              600: 'rgb(var(--accent2-500) / <alpha-value>)'
             }
           }
         }
@@ -67,1133 +221,1379 @@
     }
   </script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col custom-scrollbar">
+<body class="text-slate-100 min-h-screen flex flex-col lg:flex-row custom-scrollbar selection:bg-emerald-500/30 selection:text-emerald-300">
 
-  <!-- Top Navigation Bar -->
-  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Logo & Title -->
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <i data-lucide="wallet" class="w-5 h-5 text-slate-950"></i>
-        </div>
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="text-xl font-extrabold tracking-tight text-white">FinBud</span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Cash Forecast</span>
+  <!-- ==================== LEFT SIDEBAR (DESKTOP) ==================== -->
+  <aside id="app-sidebar" class="hidden lg:flex lg:w-64 xl:w-68 flex-col justify-between border-r border-slate-800/80 bg-slate-950/85 backdrop-blur-2xl sticky top-0 h-screen z-30 select-none shrink-0">
+    
+    <!-- Top Brand + Command Bar Trigger -->
+    <div class="p-4 space-y-4">
+      <!-- Logo & Brand -->
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('forecast')">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 ring-1 ring-white/25">
+            <i data-lucide="cpu" class="w-4 h-4 text-slate-950 stroke-[2.5]"></i>
           </div>
-          <p class="text-xs text-slate-400">Financial Buddy & Daily Cash-on-Hand Ledger</p>
-        </div>
-      </div>
-
-      <!-- Live Cash Metric Header Pill -->
-      <div class="hidden md:flex items-center space-x-6">
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-1.5 flex items-center space-x-3">
-          <div class="text-right">
-            <span class="text-[11px] uppercase tracking-wider text-slate-400 font-medium block">Starting Reserves</span>
-            <span id="nav-base-reserves" class="text-sm font-semibold font-mono text-emerald-400">$0.00</span>
-          </div>
-          <div class="h-6 w-px bg-slate-800"></div>
-          <div class="text-right">
-            <span class="text-[11px] uppercase tracking-wider text-slate-400 font-medium block">Today's Cash on Hand</span>
-            <span id="nav-today-cash" class="text-sm font-bold font-mono text-white">$0.00</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Action Buttons -->
-      <div class="flex items-center space-x-2">
-        <button onclick="openModal('modal-add-transaction')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-3.5 py-2 rounded-lg text-sm shadow-md shadow-emerald-500/20 transition">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>New Entry</span>
-        </button>
-        <button onclick="openSettingsModal()" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Settings">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 overflow-x-auto custom-scrollbar">
-      <button onclick="switchTab('forecast')" id="tab-btn-forecast" class="tab-btn active px-4 py-2.5 text-sm font-medium border-b-2 border-emerald-400 text-emerald-400 flex items-center space-x-2 whitespace-nowrap">
-        <i data-lucide="line-chart" class="w-4 h-4"></i>
-        <span>Cash Flow Forecast</span>
-      </button>
-      <button onclick="switchTab('transactions')" id="tab-btn-transactions" class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
-        <i data-lucide="receipt" class="w-4 h-4"></i>
-        <span>Transactions Ledger</span>
-      </button>
-      <button onclick="switchTab('accounts')" id="tab-btn-accounts" class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
-        <i data-lucide="layers" class="w-4 h-4"></i>
-        <span>Chart of Accounts</span>
-      </button>
-      <button onclick="switchTab('recurring')" id="tab-btn-recurring" class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
-        <i data-lucide="repeat" class="w-4 h-4"></i>
-        <span>Recurring Rules</span>
-      </button>
-      <button onclick="switchTab('import')" id="tab-btn-import" class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 whitespace-nowrap">
-        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-        <span>Excel Import & Export</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Main Content Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-    <!-- ==================== 1. CASH FORECAST VIEW ==================== -->
-    <section id="view-forecast" class="space-y-6">
-
-      <!-- Target Point-in-Time Projection Banner -->
-      <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          
-          <!-- Date Selector & Quick Pickers -->
-          <div class="lg:col-span-5 space-y-3">
-            <div class="flex items-center space-x-2">
-              <span class="inline-flex items-center justify-center p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
-                <i data-lucide="calendar-check-2" class="w-4 h-4"></i>
-              </span>
-              <h2 class="text-base font-semibold text-white">Point-in-Time Cash on Hand</h2>
-            </div>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Calculate projected accumulated cash on hand as of a specific date, assuming scheduled inflows and outflows remain constant.
-            </p>
-
-            <div class="space-y-2 pt-1">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="text-[11px] text-slate-400 font-medium">From Date (Earliest Tx)</label>
-                    <button type="button" onclick="resetForecastStartDate()" class="text-[10px] text-emerald-400 hover:text-emerald-300 underline underline-offset-2 transition" title="Start from the earliest transaction in the ledger">
-                      Earliest Tx
-                    </button>
-                  </div>
-                  <input type="date" id="forecast-start-date" onchange="onForecastStartDateChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono" title="Starts automatically on the earliest pending transaction in your ledger">
-                </div>
-                <div>
-                  <div class="mb-1">
-                    <label class="text-[11px] text-slate-400 font-medium">Forecast Target Date</label>
-                  </div>
-                  <input type="date" id="forecast-target-date" onchange="loadForecast()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-                </div>
-              </div>
-
-              <div class="flex items-center justify-between pt-0.5">
-                <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none bg-slate-950/80 px-2.5 py-1.5 rounded-xl border border-slate-800">
-                  <input type="checkbox" id="forecast-include-recurring" checked onchange="loadForecast()" class="rounded border-slate-700 text-emerald-500 focus:ring-0">
-                  <span>Include Recurring</span>
-                </label>
-                <span id="forecast-range-label" class="text-[11px] text-slate-400 font-mono">From earliest ledger date</span>
-              </div>
-            </div>
-
-            <!-- Quick Presets & Hidden/Settled Indicators -->
-            <div class="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-              <span class="text-[11px] text-slate-500 font-medium mr-1">Target:</span>
-              <button onclick="setForecastPreset('today')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">Today</button>
-              <button onclick="setForecastPreset('eom')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">End of Month</button>
-              <button onclick="setForecastPreset('30d')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">+30 Days</button>
-              <button onclick="setForecastPreset('60d')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">+60 Days</button>
-              <button onclick="setForecastPreset('90d')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">+90 Days</button>
-              <button onclick="setForecastPreset('eoy')" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300">End of Year</button>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-              <div id="forecast-hidden-badge" class="hidden items-center space-x-2 text-xs text-amber-300 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl w-max">
-                <i data-lucide="eye-off" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span id="forecast-hidden-text">0 accounts excluded from calculations</span>
-              </div>
-              <div id="forecast-settled-badge" class="hidden items-center space-x-2 text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl w-max" title="Paid & Received items are excluded from the forecast because they are already reflected in your base cash reserves">
-                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
-                <span id="forecast-settled-text">0 paid/received excluded</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Highlight Metric: Projected Cash on Hand -->
-          <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            
-            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between shadow-inner">
-              <div class="flex items-center justify-between text-slate-400">
-                <span class="text-xs uppercase tracking-wider font-medium">Projected Cash</span>
-                <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-400"></i>
-              </div>
-              <div class="my-2">
-                <div id="stat-projected-cash" class="text-2xl lg:text-3xl font-extrabold font-mono text-emerald-400">$0.00</div>
-                <div id="stat-target-date-label" class="text-[11px] text-slate-400 mt-0.5">As of --</div>
-              </div>
-              <div id="stat-projected-badge" class="inline-flex text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md w-max">
-                Positive Reserve
-              </div>
-            </div>
-
-            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between shadow-inner">
-              <div class="flex items-center justify-between text-slate-400">
-                <span class="text-xs uppercase tracking-wider font-medium">Net Flow in Window</span>
-                <i data-lucide="arrow-left-right" class="w-4 h-4 text-blue-400"></i>
-              </div>
-              <div class="my-2">
-                <div id="stat-net-flow" class="text-xl font-bold font-mono text-white">$0.00</div>
-                <div class="text-[11px] text-slate-400 flex items-center justify-between mt-1">
-                  <span class="text-emerald-400 font-mono" id="stat-inflows">+$0</span>
-                  <span class="text-rose-400 font-mono" id="stat-outflows">-$0</span>
-                </div>
-              </div>
-              <span class="text-[11px] text-slate-400" id="stat-tx-count">0 transactions</span>
-            </div>
-
-            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between shadow-inner">
-              <div class="flex items-center justify-between text-slate-400">
-                <span class="text-xs uppercase tracking-wider font-medium">Lowest Cash Dip</span>
-                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
-              </div>
-              <div class="my-2">
-                <div id="stat-min-cash" class="text-xl font-bold font-mono text-white">$0.00</div>
-                <div id="stat-min-date" class="text-[11px] text-slate-400 mt-0.5">on --</div>
-              </div>
-              <div id="stat-dip-status" class="inline-flex text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md w-max">
-                No Deficit
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Cash Trajectory Chart Card -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h3 class="text-base font-semibold text-white flex items-center space-x-2">
-              <span>Daily Cash Trajectory</span>
-              <span class="text-xs font-normal text-slate-400">(Accumulated Cash-on-Hand Curve)</span>
-            </h3>
-            <p class="text-xs text-slate-400">Hover any date to inspect accumulated cash and daily transactions.</p>
-          </div>
-          <div class="flex items-center space-x-3 text-xs">
-            <div class="flex items-center space-x-1.5 text-slate-300">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <span>Cash on Hand</span>
+            <div class="flex items-center space-x-1.5">
+              <span class="text-lg font-extrabold tracking-tight text-white">FinBud</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">OS</span>
             </div>
-            <div class="flex items-center space-x-1.5 text-slate-300">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
-              <span>Deficit Threshold ($0)</span>
-            </div>
+            <p class="text-[11px] text-slate-400 leading-none mt-0.5">Telemetry & Cash Engine</p>
           </div>
-        </div>
-
-        <div class="h-72 w-full">
-          <canvas id="cashForecastChart"></canvas>
         </div>
       </div>
 
-      <!-- Daily Breakdown Table -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-        <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h3 class="text-base font-semibold text-white">Daily Cash Ledger & Accumulator</h3>
-            <p class="text-xs text-slate-400">Day-by-day cash balance progression up to selected target date.</p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-xs text-slate-400">Filter Days:</span>
-            <button onclick="toggleOnlyActivityDays()" id="btn-toggle-activity-days" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200">
-              Show Days with Transactions Only
-            </button>
-          </div>
-        </div>
+      <!-- Command Palette Search Trigger -->
+      <button onclick="openCommandPalette()" class="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-xs text-slate-400 hover:text-slate-200 transition group shadow-inner">
+        <span class="flex items-center space-x-2">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition"></i>
+          <span>Jump or run command...</span>
+        </span>
+        <kbd class="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-slate-950 text-slate-400 rounded border border-slate-800">Ctrl K</kbd>
+      </button>
 
-        <div class="overflow-x-auto max-h-96 custom-scrollbar">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800 select-none">
-              <tr>
-                <th onclick="toggleSortDaily('date')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Date">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-daily-date">Date</span>
-                    <span id="sort-icon-daily-date" class="text-emerald-400 font-bold text-[11px]">▲</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDaily('inflow')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Inflows">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-daily-inflow">Inflows (+)</span>
-                    <span id="sort-icon-daily-inflow" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDaily('outflow')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Outflows">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-daily-outflow">Outflows (-)</span>
-                    <span id="sort-icon-daily-outflow" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDaily('net_change')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Net Day Change">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-daily-net_change">Net Day Change</span>
-                    <span id="sort-icon-daily-net_change" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDaily('cash_on_hand')" class="py-3 px-4 text-right font-bold cursor-pointer hover:text-white transition group" title="Click to sort by Cash on Hand">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-daily-cash_on_hand">End-of-Day Cash on Hand</span>
-                    <span id="sort-icon-daily-cash_on_hand" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4">Transactions Breakdown</th>
-              </tr>
-            </thead>
-            <tbody id="daily-timeline-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Primary Quick CTA -->
+      <button onclick="openModal('modal-add-transaction')" class="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400 hover:brightness-110 text-slate-950 font-extrabold py-2.5 px-4 rounded-xl text-xs shadow-lg shadow-emerald-500/20 hover:shadow-emerald-400/35 transition active:scale-[0.99]">
+        <i data-lucide="plus-circle" class="w-4 h-4 stroke-[2.4]"></i>
+        <span>New Transaction</span>
+      </button>
 
-    </section>
-
-    <!-- ==================== 2. TRANSACTIONS LEDGER VIEW ==================== -->
-    <section id="view-transactions" class="space-y-6 hidden">
-
-      <!-- Action Bar & Filters -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <!-- Navigation Links -->
+      <div class="space-y-1 pt-1">
+        <div class="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Workspace</div>
         
-        <!-- Search & Filter Controls -->
-        <div class="flex flex-1 flex-wrap items-center gap-3">
-          <div class="relative flex-1 min-w-[200px]">
-            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
-            <input type="text" id="tx-search-input" oninput="debounceTxSearch()" placeholder="Search description, account..." class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500">
-          </div>
-          
-          <div class="w-48">
-            <select id="tx-filter-account" onchange="loadTransactions()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-              <option value="">All Accounts</option>
-              <!-- Populated by JS -->
-            </select>
-          </div>
+        <button onclick="switchTab('forecast')" id="tab-btn-forecast" class="tab-btn nav-item-active w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent flex items-center justify-between transition group">
+          <span class="flex items-center space-x-2.5">
+            <i data-lucide="line-chart" class="w-4 h-4"></i>
+            <span>Cash Flow Forecast</span>
+          </span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span>
+        </button>
 
-          <!-- Show Paid / Received Checkbox Toggle (Unchecked by default = Pending Only) -->
-          <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none bg-slate-950 px-3 py-2 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition" title="By default only Pending transactions are shown. Check to also show Paid & Received items.">
-            <input type="checkbox" id="tx-show-settled" onchange="loadTransactions()" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer">
-            <span>Show Paid / Received</span>
-          </label>
+        <button onclick="switchTab('transactions')" id="tab-btn-transactions" class="tab-btn w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 flex items-center justify-between transition group">
+          <span class="flex items-center space-x-2.5">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+            <span>Transactions Ledger</span>
+          </span>
+          <span id="nav-badge-tx" class="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800">0</span>
+        </button>
 
-          <div class="flex items-center space-x-1.5">
-            <input type="date" id="tx-filter-start" onchange="loadTransactions()" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-            <span class="text-slate-400 text-xs">to</span>
-            <input type="date" id="tx-filter-end" onchange="loadTransactions()" class="bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-          </div>
+        <button onclick="switchTab('accounts')" id="tab-btn-accounts" class="tab-btn w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 flex items-center justify-between transition group">
+          <span class="flex items-center space-x-2.5">
+            <i data-lucide="layers" class="w-4 h-4"></i>
+            <span>Chart of Accounts</span>
+          </span>
+          <span id="nav-badge-acc" class="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800">0</span>
+        </button>
 
-          <!-- Sort Mechanism Selector -->
-          <div class="flex items-center space-x-1.5 bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs">
-            <span class="text-slate-400 text-[11px] font-medium">Sort:</span>
-            <select id="tx-sort-select" onchange="onSelectSortTx(this.value)" class="bg-transparent text-white focus:outline-none text-xs cursor-pointer">
-              <option value="date" class="bg-slate-900 text-white">Date</option>
-              <option value="account" class="bg-slate-900 text-white">Account</option>
-              <option value="category" class="bg-slate-900 text-white">Category / Type</option>
-              <option value="amount" class="bg-slate-900 text-white">Amount</option>
-              <option value="status" class="bg-slate-900 text-white">Status</option>
-            </select>
-            <button id="tx-sort-order-btn" onclick="toggleSortDir()" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center" title="Toggle Ascending / Descending">
-              <span id="tx-sort-order-label" class="text-[10px] font-semibold tracking-wider font-mono text-emerald-400">ASC ▲</span>
-            </button>
-          </div>
-        </div>
+        <button onclick="switchTab('recurring')" id="tab-btn-recurring" class="tab-btn w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 flex items-center justify-between transition group">
+          <span class="flex items-center space-x-2.5">
+            <i data-lucide="repeat" class="w-4 h-4"></i>
+            <span>Recurring Rules</span>
+          </span>
+          <span id="nav-badge-rec" class="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800">0</span>
+        </button>
 
-        <!-- Add Transaction & Clear -->
-        <div class="flex items-center space-x-2">
-          <button onclick="resetTxFilters()" class="px-3 py-2 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition">
-            Reset
-          </button>
-          <button onclick="openModal('modal-add-transaction')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-4 py-2 rounded-xl text-xs transition">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            <span>Add Transaction</span>
-          </button>
-        </div>
-
+        <button onclick="switchTab('import')" id="tab-btn-import" class="tab-btn w-full px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 flex items-center justify-between transition group">
+          <span class="flex items-center space-x-2.5">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>Excel Import / Export</span>
+          </span>
+        </button>
       </div>
+    </div>
 
-      <!-- Transactions Table -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-          <div>
-            <h3 class="text-base font-semibold text-white">Transactions History</h3>
-            <p id="tx-table-count" class="text-xs text-slate-400">Loading records...</p>
-          </div>
-          <button onclick="exportTransactionsExcel()" class="text-xs text-emerald-400 hover:text-emerald-300 flex items-center space-x-1 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            <span>Export to Excel</span>
+    <!-- Bottom Live Liquidity Card, Theme Switcher & Settings -->
+    <div class="p-4 space-y-3 border-t border-slate-800/80">
+      
+      <!-- Futuristic Theme Switcher -->
+      <div class="rounded-2xl bg-slate-900/80 border border-slate-800/90 p-2.5 space-y-2">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold flex items-center space-x-1.5">
+            <i data-lucide="palette" class="w-3 h-3 text-emerald-400"></i>
+            <span>HUD Theme</span>
+          </span>
+          <span id="active-theme-label" class="text-[10px] font-mono text-emerald-300 font-semibold">Cyber Cyan</span>
+        </div>
+        <div class="grid grid-cols-4 gap-1.5">
+          <button type="button" onclick="setFuturisticTheme('cyber')" data-theme-btn="cyber" class="theme-pill-btn py-1.5 rounded-xl border border-cyan-400/50 bg-cyan-500/10 flex flex-col items-center justify-center space-y-1 transition hover:scale-105" title="Cyber Cyan & Electric Violet">
+            <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 shadow-sm shadow-cyan-400/50"></span>
+            <span class="text-[9px] font-semibold text-slate-200">Cyber</span>
           </button>
-        </div>
-
-        <!-- Bulk Actions Floating Bar (Shown when transactions are selected) -->
-        <div id="tx-bulk-bar" class="hidden items-center justify-between bg-emerald-950/95 border-b border-emerald-500/30 px-4 py-2.5 shadow-xl transition-all">
-          <div class="flex items-center space-x-3">
-            <span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs" id="tx-bulk-count">0</span>
-            <span class="text-xs font-semibold text-white">selected</span>
-            <button type="button" onclick="clearSelectedTransactions()" class="text-[11px] text-slate-400 hover:text-white underline underline-offset-2 ml-1">Deselect all</button>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button type="button" onclick="bulkSetTxStatus('cleared')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow transition" title="Mark selected transactions as Paid (expenses) or Received (income)">
-              <i data-lucide="check-check" class="w-4 h-4"></i>
-              <span>Mark as Paid / Received</span>
-            </button>
-            <button type="button" onclick="bulkSetTxStatus('pending')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition" title="Restore selected transactions back to Pending">
-              <i data-lucide="clock" class="w-4 h-4"></i>
-              <span>Mark as Pending</span>
-            </button>
-            <button type="button" onclick="bulkDeleteSelectedTransactions()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500 hover:text-white text-rose-300 border border-rose-500/30 transition" title="Delete selected transactions">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              <span>Delete</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto max-h-[600px] custom-scrollbar">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/90 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800 select-none">
-              <tr>
-                <th class="py-3 px-3 w-10 text-center">
-                  <input type="checkbox" id="tx-select-all" onchange="toggleSelectAllTransactions(this.checked)" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select all visible transactions">
-                </th>
-                <th onclick="toggleSortTx('date')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Date">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-label-date">Date</span>
-                    <span id="sort-icon-date" class="text-emerald-400 font-bold text-[11px]">▲</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortTx('account')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Account">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-label-account">Account</span>
-                    <span id="sort-icon-account" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortTx('category')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Category / Type">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-label-category">Category / Type</span>
-                    <span id="sort-icon-category" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortTx('amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Amount">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-label-amount">Amount</span>
-                    <span id="sort-icon-amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortTx('description')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Description">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-label-description">Description / Memo</span>
-                    <span id="sort-icon-description" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortTx('status')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Status">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-label-status">Status</span>
-                    <span id="sort-icon-status" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="tx-table-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
+          <button type="button" onclick="setFuturisticTheme('quantum')" data-theme-btn="quantum" class="theme-pill-btn py-1.5 rounded-xl border border-slate-800 bg-slate-950/70 flex flex-col items-center justify-center space-y-1 transition hover:scale-105" title="Quantum Ultraviolet & Plasma">
+            <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-purple-400 via-fuchsia-500 to-sky-400"></span>
+            <span class="text-[9px] font-semibold text-slate-400">Quantum</span>
+          </button>
+          <button type="button" onclick="setFuturisticTheme('solar')" data-theme-btn="solar" class="theme-pill-btn py-1.5 rounded-xl border border-slate-800 bg-slate-950/70 flex flex-col items-center justify-center space-y-1 transition hover:scale-105" title="Solar Gold & Carbon Cyberpunk">
+            <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-amber-400 to-cyan-400"></span>
+            <span class="text-[9px] font-semibold text-slate-400">Solar</span>
+          </button>
+          <button type="button" onclick="setFuturisticTheme('matrix')" data-theme-btn="matrix" class="theme-pill-btn py-1.5 rounded-xl border border-slate-800 bg-slate-950/70 flex flex-col items-center justify-center space-y-1 transition hover:scale-105" title="Bio-Neon Matrix Mint">
+            <span class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-emerald-400 to-cyan-300"></span>
+            <span class="text-[9px] font-semibold text-slate-400">Matrix</span>
+          </button>
         </div>
       </div>
 
-    </section>
-
-    <!-- ==================== 3. ACCOUNTS VIEW ==================== -->
-    <section id="view-accounts" class="space-y-6 hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-xl font-bold text-white">Chart of Accounts</h2>
-          <p class="text-xs text-slate-400">Manage account numbers, account names, and categorization categories.</p>
+      <!-- Liquidity Pulse -->
+      <div class="rounded-2xl bg-gradient-to-b from-slate-900/95 to-slate-950 border border-slate-800/90 p-3.5 space-y-2.5 shadow-inner">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold flex items-center space-x-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Liquidity Pulse</span>
+          </span>
+          <button onclick="openSettingsModal()" class="text-slate-400 hover:text-emerald-400 transition" title="Configure Base Reserves">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
-        <button onclick="openAddAccountModalFromContext('accounts')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-4 py-2 rounded-xl text-xs transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>Add Account</span>
+
+        <div class="space-y-1.5 pt-0.5">
+          <div class="flex items-baseline justify-between">
+            <span class="text-[11px] text-slate-400">Today's Cash</span>
+            <span id="nav-today-cash" class="text-sm font-extrabold font-mono text-emerald-400">$0.00</span>
+          </div>
+          <div class="flex items-baseline justify-between border-t border-slate-800/60 pt-1.5">
+            <span class="text-[11px] text-slate-500">Base Reserves</span>
+            <span id="nav-base-reserves" class="text-xs font-semibold font-mono text-slate-300">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+        <button onclick="openSettingsModal()" class="flex items-center space-x-1.5 hover:text-white transition py-1">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+          <span>Forecast Settings</span>
+        </button>
+        <button onclick="recalculateAllBalances().then(() => showToast('All balances recalculated'))" class="p-1.5 hover:text-emerald-400 hover:bg-slate-900 rounded-lg transition" title="Recalculate All Balances">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
         </button>
       </div>
 
-      <!-- Accounts Cash Reserves Summary Banner -->
-      <div id="accounts-cash-summary-banner" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
-        <div class="flex items-center space-x-3.5">
-          <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
-            <i data-lucide="wallet" class="w-6 h-6"></i>
+      <!-- User Profile & Isolated Vault Badge -->
+      <div class="rounded-2xl bg-slate-900/90 border border-slate-800/90 p-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div id="user-avatar-box" class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-300 font-bold text-xs shrink-0 overflow-hidden">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
           </div>
-          <div>
+          <div class="min-w-0">
+            <div class="flex items-center space-x-1.5">
+              <span id="user-display-name" class="text-xs font-bold text-white truncate">Local Workspace</span>
+              <span id="user-vault-badge" class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">Primary</span>
+            </div>
+            <div id="user-email-label" class="text-[10px] text-slate-400 truncate">Click &rarr; to Sign In / Lock</div>
+          </div>
+        </div>
+        <a id="user-auth-action-btn" href="/login" class="p-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-emerald-300 border border-slate-800 transition shrink-0" title="Sign In / Switch User Vault">
+          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN WORKSPACE COLUMN ==================== -->
+  <div class="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
+
+    <!-- Top Contextual Header Bar -->
+    <header class="border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl sticky top-0 z-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
+        
+        <!-- Mobile Brand + Current View Breadcrumb -->
+        <div class="flex items-center space-x-3 min-w-0">
+          <div class="lg:hidden w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0" onclick="switchTab('forecast')">
+            <i data-lucide="wallet" class="w-4 h-4 text-slate-950"></i>
+          </div>
+          <div class="truncate">
             <div class="flex items-center space-x-2">
-              <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Total Liquid Cash Reserves</span>
-              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">Auto-Calculated</span>
+              <h1 id="header-view-title" class="text-sm sm:text-base font-bold text-white tracking-tight truncate">Cash Flow Forecast</h1>
+              <span id="header-view-subtitle" class="hidden sm:inline-flex text-[11px] text-slate-400 border-l border-slate-800 pl-2">Real-time accumulator & runway</span>
             </div>
-            <div class="text-2xl font-extrabold font-mono text-emerald-400 mt-0.5" id="accounts-banner-total">$0.00</div>
-          </div>
-        </div>
-        <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-          Auto-calculated from all active <b>Cash</b> accounts (Checking, Savings, Reserves). Updating any account's starting balance automatically flows into your Cash Flow Forecast.
-        </p>
-      </div>
-
-      <!-- Accounts Table -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-        <!-- Bulk Actions Floating Bar (Shown when accounts are selected) -->
-        <div id="acc-bulk-bar" class="hidden items-center justify-between bg-emerald-950/95 border-b border-emerald-500/30 px-4 py-2.5 shadow-xl transition-all">
-          <div class="flex items-center space-x-3">
-            <span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs" id="acc-bulk-count">0</span>
-            <span class="text-xs font-semibold text-white">accounts selected</span>
-            <button type="button" onclick="clearSelectedAccounts()" class="text-[11px] text-slate-400 hover:text-white underline underline-offset-2 ml-1">Deselect all</button>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button type="button" onclick="bulkDeleteSelectedAccounts()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500 hover:bg-rose-400 text-white shadow transition" title="Delete selected accounts and their attached transactions">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-              <span>Delete Selected Accounts</span>
-            </button>
           </div>
         </div>
 
-        <div class="overflow-x-auto max-h-[650px] custom-scrollbar">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800 select-none">
-              <tr>
-                <th class="py-3 px-3 w-10 text-center">
-                  <input type="checkbox" id="acc-select-all" onchange="toggleSelectAllAccounts(this.checked)" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select all visible accounts">
-                </th>
-                <th onclick="toggleSortAccounts('account_id')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Account #">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-acc-account_id">Account #</span>
-                    <span id="sort-icon-acc-account_id" class="text-emerald-400 font-bold text-[11px]">▲</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortAccounts('account_name')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Account Name">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-acc-account_name">Account Name</span>
-                    <span id="sort-icon-acc-account_name" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortAccounts('type')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Account Type">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-acc-type">Account Type</span>
-                    <span id="sort-icon-acc-type" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortAccounts('starting_balance')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Starting Balance">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-acc-starting_balance">Starting Balance</span>
-                    <span id="sort-icon-acc-starting_balance" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortAccounts('is_hidden')" class="py-3 px-4 text-center cursor-pointer hover:text-white transition group" title="Click to sort by Forecast Status">
-                  <div class="flex items-center justify-center space-x-1.5">
-                    <span id="th-acc-is_hidden">Forecast Status</span>
-                    <span id="sort-icon-acc-is_hidden" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortAccounts('transaction_count')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Transaction Count">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-acc-transaction_count">Transactions</span>
-                    <span id="sort-icon-acc-transaction_count" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortAccounts('total_amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Net All-Time Sum">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-acc-total_amount">Net All-Time Sum</span>
-                    <span id="sort-icon-acc-total_amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="accounts-table-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 3.1 ACCOUNT DETAIL VIEW ==================== -->
-    <section id="view-account-detail" class="space-y-6 hidden">
-      <!-- Breadcrumb & Top Controls -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-          <button onclick="closeAccountDetail()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-700 shadow">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            <span>Back to Accounts</span>
+        <!-- Right Quick Actions & Mobile Cash Pill -->
+        <div class="flex items-center space-x-2 shrink-0">
+          <!-- Command Palette Pill (Mobile/Tablet & Desktop Quick Access) -->
+          <button onclick="openCommandPalette()" class="flex items-center space-x-2 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 px-2.5 py-1.5 rounded-xl text-xs transition" title="Open Command Palette (Ctrl+K)">
+            <i data-lucide="command" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span class="hidden sm:inline text-slate-400">Search / Jump</span>
+            <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-slate-950 text-slate-400 rounded border border-slate-800">Ctrl K</kbd>
           </button>
-          <div>
+
+          <button onclick="openAddAccountModalFromContext('accounts')" class="hidden sm:flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 hover:border-slate-700 font-medium px-3 py-1.5 rounded-xl text-xs transition">
+            <i data-lucide="folder-plus" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>New Account</span>
+          </button>
+
+          <button onclick="openModal('modal-add-transaction')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shadow-md shadow-emerald-500/15 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            <span>New Entry</span>
+          </button>
+
+          <button onclick="openSettingsModal()" class="lg:hidden p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition" title="Settings">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+      <!-- ==================== 1. CASH FORECAST VIEW ==================== -->
+      <section id="view-forecast" class="space-y-6 view-animate">
+
+        <!-- Hero Bento Grid: Controls + 3 KPI Cards -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 relative overflow-hidden">
+          <div class="absolute -right-16 -top-16 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch relative z-10">
+            
+            <!-- Date Selector & Horizon Presets -->
+            <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center justify-center p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+                      <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </span>
+                    <h2 class="text-base font-bold text-white tracking-tight">Point-in-Time Cash Horizon</h2>
+                  </div>
+                  <span id="forecast-range-label" class="text-[11px] text-slate-400 font-mono bg-slate-950/80 px-2 py-0.5 rounded-md border border-slate-800/80">From earliest ledger date</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                  Simulate accumulated liquid cash on hand through any target date based on pending inflows, bills, and recurring schedules.
+                </p>
+              </div>
+
+              <div class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[11px] text-slate-400 font-medium">From Date</label>
+                      <button type="button" onclick="resetForecastStartDate()" class="text-[10px] text-emerald-400 hover:text-emerald-300 font-medium transition" title="Start from the earliest pending transaction in the ledger">
+                        Reset to Earliest
+                      </button>
+                    </div>
+                    <input type="date" id="forecast-start-date" onchange="onForecastStartDateChange()" class="w-full bg-slate-950/90 border border-slate-800 hover:border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition" title="Starts automatically on the earliest pending transaction in your ledger">
+                  </div>
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[11px] text-slate-400 font-medium">Target Horizon Date</label>
+                      <span class="text-[10px] text-slate-500">End of projection</span>
+                    </div>
+                    <input type="date" id="forecast-target-date" onchange="loadForecast()" class="w-full bg-slate-950/90 border border-slate-800 hover:border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition">
+                  </div>
+                </div>
+
+                <!-- Segmented Horizon Preset Bar + Recurring Toggle -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                  <div class="inline-flex items-center bg-slate-950/90 p-1 rounded-xl border border-slate-800/90 space-x-0.5">
+                    <button onclick="setForecastPreset('today')" data-preset="today" class="forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-400 hover:text-white transition">Today</button>
+                    <button onclick="setForecastPreset('eom')" data-preset="eom" class="forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-400 hover:text-white transition">EOM</button>
+                    <button onclick="setForecastPreset('30d')" data-preset="30d" class="forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-400 hover:text-white transition">+30D</button>
+                    <button onclick="setForecastPreset('60d')" data-preset="60d" class="forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition">+60D</button>
+                    <button onclick="setForecastPreset('90d')" data-preset="90d" class="forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-400 hover:text-white transition">+90D</button>
+                    <button onclick="setForecastPreset('eoy')" data-preset="eoy" class="forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-400 hover:text-white transition">EOY</button>
+                  </div>
+
+                  <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none bg-slate-950/90 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                    <input type="checkbox" id="forecast-include-recurring" checked onchange="loadForecast()" class="rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-0">
+                    <span>Include Recurring</span>
+                  </label>
+                </div>
+
+                <!-- Status Pills -->
+                <div class="flex flex-wrap items-center gap-2">
+                  <div id="forecast-hidden-badge" class="hidden items-center space-x-1.5 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg w-max">
+                    <i data-lucide="eye-off" class="w-3 h-3 text-amber-400"></i>
+                    <span id="forecast-hidden-text">0 accounts excluded</span>
+                  </div>
+                  <div id="forecast-settled-badge" class="hidden items-center space-x-1.5 text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg w-max" title="Paid & Received items are excluded from the forecast because they are already reflected in your base cash reserves">
+                    <i data-lucide="check-circle" class="w-3 h-3 text-emerald-400"></i>
+                    <span id="forecast-settled-text">0 paid/received excluded</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bento KPI Cards (3 Columns) -->
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              
+              <!-- Card 1: Projected Cash -->
+              <div class="bento-kpi rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden">
+                <div class="flex items-center justify-between text-slate-400">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold">Projected Cash</span>
+                  <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+                    <i data-lucide="wallet" class="w-4 h-4"></i>
+                  </span>
+                </div>
+                <div class="my-3">
+                  <div id="stat-projected-cash" class="text-2xl xl:text-3xl font-extrabold font-mono text-emerald-400 tracking-tight">$0.00</div>
+                  <div id="stat-target-date-label" class="text-[11px] text-slate-400 mt-1">As of --</div>
+                </div>
+                <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/70">
+                  <div id="stat-projected-badge" class="inline-flex text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md w-max">
+                    Positive Reserve
+                  </div>
+                  <span id="stat-projected-delta" class="text-[11px] font-mono text-slate-400"></span>
+                </div>
+              </div>
+
+              <!-- Card 2: Net Flow in Window -->
+              <div class="bento-kpi rounded-2xl p-4 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold">Net Window Flow</span>
+                  <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+                    <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+                  </span>
+                </div>
+                <div class="my-3">
+                  <div id="stat-net-flow" class="text-2xl font-extrabold font-mono text-white tracking-tight">$0.00</div>
+                  <div class="text-[11px] flex items-center justify-between mt-1.5">
+                    <span class="text-emerald-400 font-mono font-medium" id="stat-inflows">+$0</span>
+                    <span class="text-rose-400 font-mono font-medium" id="stat-outflows">-$0</span>
+                  </div>
+                  <!-- Proportional Inflow/Outflow Bar -->
+                  <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden flex mt-2">
+                    <div id="stat-flow-bar-in" class="bg-emerald-400 h-full transition-all duration-500" style="width: 50%"></div>
+                    <div id="stat-flow-bar-out" class="bg-rose-400 h-full transition-all duration-500" style="width: 50%"></div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between pt-2 border-t border-slate-800/70">
+                  <span class="text-[11px] text-slate-400" id="stat-tx-count">0 pending events</span>
+                  <button onclick="switchTab('transactions')" class="text-[11px] text-emerald-400 hover:underline">View →</button>
+                </div>
+              </div>
+
+              <!-- Card 3: Lowest Cash Dip -->
+              <div class="bento-kpi rounded-2xl p-4 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400">
+                  <span class="text-[11px] uppercase tracking-wider font-semibold">Lowest Cash Point</span>
+                  <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                  </span>
+                </div>
+                <div class="my-3">
+                  <div id="stat-min-cash" class="text-2xl font-extrabold font-mono text-white tracking-tight">$0.00</div>
+                  <div id="stat-min-date" class="text-[11px] text-slate-400 mt-1">on --</div>
+                </div>
+                <div class="pt-2 border-t border-slate-800/70 flex items-center justify-between">
+                  <div id="stat-dip-status" class="inline-flex text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md w-max">
+                    Safe Cushion
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Cash Trajectory Chart Card -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="text-base font-bold text-white">Daily Cash Trajectory</h3>
+                <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Interactive Curve</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Hover any date along the curve to inspect accumulated cash and the exact transactions scheduled that day.</p>
+            </div>
+            <div class="flex items-center space-x-4 text-xs bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800/80">
+              <div class="flex items-center space-x-1.5 text-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+                <span>Projected Cash</span>
+              </div>
+              <div class="flex items-center space-x-1.5 text-slate-400">
+                <span class="w-3 h-0.5 border-t-2 border-dashed border-rose-400"></span>
+                <span>$0 Floor</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="h-80 w-full">
+            <canvas id="cashForecastChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Daily Breakdown Table -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <div class="p-4 sm:px-6 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-base font-bold text-white">Daily Cash Ledger & Accumulator</h3>
+              <p class="text-xs text-slate-400">Day-by-day cash progression up to your selected target date.</p>
+            </div>
             <div class="flex items-center space-x-2">
-              <h2 id="detail-account-name" class="text-xl font-bold text-white">Account Name</h2>
-              <span id="detail-account-id-badge" class="font-mono text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-semibold">#---</span>
-              <span id="detail-account-type-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Cash</span>
+              <button onclick="toggleOnlyActivityDays()" id="btn-toggle-activity-days" class="text-xs font-medium px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition flex items-center space-x-1.5">
+                <i data-lucide="filter" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Show Days with Transactions Only</span>
+              </button>
             </div>
-            <p class="text-xs text-slate-400 mt-0.5">Account ledger, individual transaction records, and real-time reconciliation.</p>
+          </div>
+
+          <div class="overflow-x-auto max-h-[440px] custom-scrollbar">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/90 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800/90 select-none backdrop-blur">
+                <tr>
+                  <th onclick="toggleSortDaily('date')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Date">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-daily-date">Date</span>
+                      <span id="sort-icon-daily-date" class="text-emerald-400 font-bold text-[11px]">▲</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDaily('inflow')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Inflows">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-daily-inflow">Inflows (+)</span>
+                      <span id="sort-icon-daily-inflow" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDaily('outflow')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Outflows">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-daily-outflow">Outflows (-)</span>
+                      <span id="sort-icon-daily-outflow" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDaily('net_change')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Net Day Change">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-daily-net_change">Net Day Change</span>
+                      <span id="sort-icon-daily-net_change" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDaily('cash_on_hand')" class="py-3 px-4 text-right font-bold cursor-pointer hover:text-white transition group" title="Click to sort by Cash on Hand">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-daily-cash_on_hand">End-of-Day Cash</span>
+                      <span id="sort-icon-daily-cash_on_hand" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th class="py-3 px-4">Transactions Breakdown</th>
+                </tr>
+              </thead>
+              <tbody id="daily-timeline-tbody" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button id="detail-toggle-hidden-btn" onclick="toggleDetailAccountHidden()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition border">
-            <!-- Dynamically populated -->
-          </button>
-          <button onclick="openEditCurrentAccountModal()" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-3 py-2 rounded-xl text-xs font-semibold transition border border-slate-700">
-            <i data-lucide="edit-3" class="w-4 h-4"></i>
-            <span>Edit Account</span>
-          </button>
-          <button onclick="openAddTransactionForAccount()" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition shadow-lg">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            <span>Add Transaction</span>
-          </button>
-        </div>
-      </div>
+      </section>
 
-      <!-- Financial Metric Cards (5 Cards) -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <!-- Starting Balance -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between relative group">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] uppercase tracking-wider font-semibold">Starting Balance</span>
-            <button onclick="openEditStartingBalancePrompt()" class="text-slate-500 hover:text-emerald-400 p-1 rounded transition" title="Quick Edit Starting Balance">
-              <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-          <div class="my-2">
-            <div id="detail-stat-starting-balance" class="text-xl font-bold font-mono text-white">$0.00</div>
-          </div>
-          <span class="text-[10px] text-slate-400 font-sans">Baseline reserve balance</span>
-        </div>
+      <!-- ==================== 2. TRANSACTIONS LEDGER VIEW ==================== -->
+      <section id="view-transactions" class="space-y-6 hidden view-animate">
 
-        <!-- Total Inflows (+) -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] uppercase tracking-wider font-semibold">Total Inflows (+)</span>
-            <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i>
-          </div>
-          <div class="my-2">
-            <div id="detail-stat-inflows" class="text-xl font-bold font-mono text-emerald-400">+$0.00</div>
-          </div>
-          <span class="text-[10px] text-slate-400 font-sans">Income & Deposits</span>
-        </div>
+        <!-- Action Bar & Filters -->
+        <div class="glass-card rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          
+          <!-- Search & Filter Controls -->
+          <div class="flex flex-1 flex-wrap items-center gap-2.5">
+            <div class="relative flex-1 min-w-[200px]">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+              <input type="text" id="tx-search-input" oninput="debounceTxSearch()" placeholder="Search description, account..." class="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+            
+            <div class="w-48">
+              <select id="tx-filter-account" onchange="loadTransactions()" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                <option value="">All Accounts</option>
+                <!-- Populated by JS -->
+              </select>
+            </div>
 
-        <!-- Total Outflows (-) -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] uppercase tracking-wider font-semibold">Total Outflows (-)</span>
-            <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i>
-          </div>
-          <div class="my-2">
-            <div id="detail-stat-outflows" class="text-xl font-bold font-mono text-rose-400">-$0.00</div>
-          </div>
-          <span class="text-[10px] text-slate-400 font-sans">Expenses & Debits</span>
-        </div>
+            <!-- Show Paid / Received Checkbox Toggle -->
+            <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none bg-slate-950/90 px-3 py-2 rounded-xl border border-slate-800 hover:border-emerald-500/40 transition" title="By default only Pending transactions are shown. Check to also show Paid & Received items.">
+              <input type="checkbox" id="tx-show-settled" onchange="loadTransactions()" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer">
+              <span>Show Paid / Received</span>
+            </label>
 
-        <!-- Net Ledger Activity -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] uppercase tracking-wider font-semibold">Net Activity</span>
-            <i data-lucide="activity" class="w-4 h-4 text-blue-400"></i>
-          </div>
-          <div class="my-2">
-            <div id="detail-stat-net" class="text-xl font-bold font-mono text-white">$0.00</div>
-          </div>
-          <span id="detail-stat-tx-count" class="text-[10px] text-slate-400 font-sans">0 transactions</span>
-        </div>
+            <div class="flex items-center space-x-1.5">
+              <input type="date" id="tx-filter-start" onchange="loadTransactions()" class="bg-slate-950/90 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+              <span class="text-slate-500 text-xs">to</span>
+              <input type="date" id="tx-filter-end" onchange="loadTransactions()" class="bg-slate-950/90 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+            </div>
 
-        <!-- Current Calculated Balance -->
-        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 shadow-lg flex flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/20 col-span-2 sm:col-span-1">
-          <div class="flex items-center justify-between text-emerald-300">
-            <span class="text-[11px] uppercase tracking-wider font-semibold">Calculated Balance</span>
-            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+            <!-- Sort Mechanism Selector -->
+            <div class="flex items-center space-x-1.5 bg-slate-950/90 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs">
+              <span class="text-slate-400 text-[11px] font-medium">Sort:</span>
+              <select id="tx-sort-select" onchange="onSelectSortTx(this.value)" class="bg-transparent text-white focus:outline-none text-xs cursor-pointer">
+                <option value="date" class="bg-slate-900 text-white">Date</option>
+                <option value="account" class="bg-slate-900 text-white">Account</option>
+                <option value="category" class="bg-slate-900 text-white">Category / Type</option>
+                <option value="amount" class="bg-slate-900 text-white">Amount</option>
+                <option value="status" class="bg-slate-900 text-white">Status</option>
+              </select>
+              <button id="tx-sort-order-btn" onclick="toggleSortDir()" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center" title="Toggle Ascending / Descending">
+                <span id="tx-sort-order-label" class="text-[10px] font-semibold tracking-wider font-mono text-emerald-400">ASC ▲</span>
+              </button>
+            </div>
           </div>
-          <div class="my-2">
-            <div id="detail-stat-calculated-balance" class="text-2xl font-extrabold font-mono text-emerald-400">$0.00</div>
-          </div>
-          <span class="text-[10px] text-emerald-300/70 font-sans">Starting Bal + Net Activity</span>
-        </div>
-      </div>
 
-      <!-- Quick Add Row Form (Fast Row Entry) -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
-        <div class="flex items-center justify-between mb-3">
+          <!-- Add Transaction & Clear -->
           <div class="flex items-center space-x-2">
-            <span class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400">
-              <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            </span>
-            <h3 class="text-sm font-semibold text-white">Quick Add Transaction to This Account</h3>
-            <span class="text-[11px] text-slate-400 font-sans hidden sm:inline">(Fast-entry row for instant insertion)</span>
-          </div>
-          <span class="text-[11px] text-slate-400 font-mono hidden md:inline">Account #<span id="quick-tx-acc-id-label">--</span></span>
-        </div>
-
-        <form onsubmit="submitQuickAddDetailTx(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-          <!-- Date -->
-          <div class="sm:col-span-3">
-            <label class="block text-[11px] text-slate-400 font-medium mb-1">Date</label>
-            <input type="date" id="quick-tx-date" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-          </div>
-
-          <!-- Type Toggle: Expense / Income -->
-          <div class="sm:col-span-2">
-            <label class="block text-[11px] text-slate-400 font-medium mb-1">Flow</label>
-            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-700">
-              <button type="button" id="btn-quick-sign-expense" onclick="setQuickTxSign(-1)" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                - Outflow
-              </button>
-              <button type="button" id="btn-quick-sign-income" onclick="setQuickTxSign(1)" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-400 hover:text-emerald-400 border border-transparent">
-                + Inflow
-              </button>
-            </div>
-          </div>
-
-          <!-- Amount -->
-          <div class="sm:col-span-2">
-            <label class="block text-[11px] text-slate-400 font-medium mb-1">Amount ($)</label>
-            <div class="relative">
-              <span class="absolute left-3 top-2 text-slate-400 text-xs font-mono">$</span>
-              <input type="number" id="quick-tx-amount" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-7 pr-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-            </div>
-          </div>
-
-          <!-- Description / Memo -->
-          <div class="sm:col-span-3">
-            <label class="block text-[11px] text-slate-400 font-medium mb-1">Description / Memo</label>
-            <input type="text" id="quick-tx-desc" placeholder="e.g. Cleared bill, payroll, loan payment..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-          </div>
-
-          <!-- Add Row Button -->
-          <div class="sm:col-span-2">
-            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-md">
+            <button onclick="resetTxFilters()" class="px-3 py-2 text-xs text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl transition">
+              Reset
+            </button>
+            <button onclick="openModal('modal-add-transaction')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition shadow-md shadow-emerald-500/10">
               <i data-lucide="plus" class="w-4 h-4"></i>
-              <span>Add Row</span>
+              <span>Add Transaction</span>
             </button>
           </div>
-        </form>
-      </div>
 
-      <!-- Full Transactions Ledger for this Account -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-        <!-- Filter and Search Header -->
-        <div class="p-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <h3 class="text-base font-semibold text-white">Account Ledger Records</h3>
-            <p id="detail-tx-table-count" class="text-xs text-slate-400">Loading records...</p>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <div class="p-4 sm:px-6 border-b border-slate-800/80 flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-bold text-white">Transactions History</h3>
+              <p id="tx-table-count" class="text-xs text-slate-400">Loading records...</p>
+            </div>
+            <button onclick="exportTransactionsExcel()" class="text-xs text-emerald-400 hover:text-emerald-300 flex items-center space-x-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/20 transition font-medium">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Export Excel</span>
+            </button>
+          </div>
+
+          <!-- Bulk Actions Floating Bar -->
+          <div id="tx-bulk-bar" class="hidden items-center justify-between bg-emerald-950/95 border-b border-emerald-500/30 px-4 py-2.5 shadow-xl transition-all">
+            <div class="flex items-center space-x-3">
+              <span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs" id="tx-bulk-count">0</span>
+              <span class="text-xs font-semibold text-white">selected</span>
+              <button type="button" onclick="clearSelectedTransactions()" class="text-[11px] text-slate-400 hover:text-white underline underline-offset-2 ml-1">Deselect all</button>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button type="button" onclick="bulkSetTxStatus('cleared')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow transition">
+                <i data-lucide="check-check" class="w-4 h-4"></i>
+                <span>Mark as Paid / Received</span>
+              </button>
+              <button type="button" onclick="bulkSetTxStatus('pending')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                <span>Mark as Pending</span>
+              </button>
+              <button type="button" onclick="bulkDeleteSelectedTransactions()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500 hover:text-white text-rose-300 border border-rose-500/30 transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-[620px] custom-scrollbar">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/90 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800/90 select-none backdrop-blur">
+                <tr>
+                  <th class="py-3 px-3 w-10 text-center">
+                    <input type="checkbox" id="tx-select-all" onchange="toggleSelectAllTransactions(this.checked)" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select all visible transactions">
+                  </th>
+                  <th onclick="toggleSortTx('date')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-label-date">Date</span>
+                      <span id="sort-icon-date" class="text-emerald-400 font-bold text-[11px]">▲</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortTx('account')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-label-account">Account</span>
+                      <span id="sort-icon-account" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortTx('category')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-label-category">Category / Type</span>
+                      <span id="sort-icon-category" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortTx('amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-label-amount">Amount</span>
+                      <span id="sort-icon-amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortTx('description')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-label-description">Description / Memo</span>
+                      <span id="sort-icon-description" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortTx('status')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-label-status">Status</span>
+                      <span id="sort-icon-status" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tx-table-tbody" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==================== 3. ACCOUNTS VIEW ==================== -->
+      <section id="view-accounts" class="space-y-6 hidden view-animate">
+        
+        <!-- Accounts Cash Reserves Summary Banner + Controls -->
+        <div id="accounts-cash-summary-banner" class="glass-card rounded-2xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative overflow-hidden">
+          <div class="absolute -right-10 -bottom-10 w-52 h-52 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="flex items-center space-x-4">
+            <div class="p-3.5 rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+              <i data-lucide="landmark" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Total Liquid Cash Reserves</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">Auto-Synced</span>
+              </div>
+              <div class="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400 mt-0.5" id="accounts-banner-total">$0.00</div>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                Sum of active <b>Cash</b> accounts (100s). Click any account row to open its full interactive ledger.
+              </p>
+            </div>
+          </div>
+
+          <!-- Search, Group Mode Toggle, & Add Account -->
+          <div class="flex flex-wrap items-center gap-2.5 z-10">
+            <div class="relative min-w-[190px]">
+              <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+              <input type="text" id="acc-search-input" oninput="renderAccountsTable()" placeholder="Filter accounts (# or name)..." class="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div class="inline-flex bg-slate-950/90 p-1 rounded-xl border border-slate-800 text-xs">
+              <button type="button" id="btn-acc-view-grouped" onclick="setAccountsViewMode('grouped')" class="px-2.5 py-1 rounded-lg font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition">
+                Grouped
+              </button>
+              <button type="button" id="btn-acc-view-flat" onclick="setAccountsViewMode('flat')" class="px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white border border-transparent transition">
+                Flat List
+              </button>
+            </div>
+
+            <button onclick="openAddAccountModalFromContext('accounts')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-emerald-500/15">
+              <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
+              <span>Add Account</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Accounts Table -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <!-- Bulk Actions Floating Bar -->
+          <div id="acc-bulk-bar" class="hidden items-center justify-between bg-emerald-950/95 border-b border-emerald-500/30 px-4 py-2.5 shadow-xl transition-all">
+            <div class="flex items-center space-x-3">
+              <span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs" id="acc-bulk-count">0</span>
+              <span class="text-xs font-semibold text-white">accounts selected</span>
+              <button type="button" onclick="clearSelectedAccounts()" class="text-[11px] text-slate-400 hover:text-white underline underline-offset-2 ml-1">Deselect all</button>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button type="button" onclick="bulkDeleteSelectedAccounts()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500 hover:bg-rose-400 text-white shadow transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span>Delete Selected Accounts</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-[680px] custom-scrollbar">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/90 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800/90 select-none backdrop-blur">
+                <tr>
+                  <th class="py-3 px-3 w-10 text-center">
+                    <input type="checkbox" id="acc-select-all" onchange="toggleSelectAllAccounts(this.checked)" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select all visible accounts">
+                  </th>
+                  <th onclick="toggleSortAccounts('account_id')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-acc-account_id">Account #</span>
+                      <span id="sort-icon-acc-account_id" class="text-emerald-400 font-bold text-[11px]">▲</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortAccounts('account_name')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-acc-account_name">Account Name</span>
+                      <span id="sort-icon-acc-account_name" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortAccounts('type')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-acc-type">Account Type</span>
+                      <span id="sort-icon-acc-type" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortAccounts('starting_balance')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-acc-starting_balance">Starting Balance</span>
+                      <span id="sort-icon-acc-starting_balance" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortAccounts('is_hidden')" class="py-3 px-4 text-center cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-center space-x-1.5">
+                      <span id="th-acc-is_hidden">Forecast Status</span>
+                      <span id="sort-icon-acc-is_hidden" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortAccounts('transaction_count')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-acc-transaction_count">Transactions</span>
+                      <span id="sort-icon-acc-transaction_count" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortAccounts('total_amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-acc-total_amount">Net Pending Sum</span>
+                      <span id="sort-icon-acc-total_amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-table-tbody" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 3.1 ACCOUNT DETAIL VIEW ==================== -->
+      <section id="view-account-detail" class="space-y-6 hidden view-animate">
+        <!-- Breadcrumb & Top Controls -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-center space-x-3.5">
+            <button onclick="closeAccountDetail()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-800 shadow">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              <span>Back to Accounts</span>
+            </button>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h2 id="detail-account-name" class="text-xl font-bold text-white">Account Name</h2>
+                <span id="detail-account-id-badge" class="font-mono text-xs px-2 py-0.5 rounded-lg bg-slate-900 text-emerald-400 border border-slate-800 font-semibold">#---</span>
+                <span id="detail-account-type-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Cash</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Account ledger, individual transaction records, and real-time reconciliation.</p>
+            </div>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <div class="relative min-w-[200px]">
-              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
-              <input type="text" id="detail-tx-search" oninput="debounceDetailTxSearch()" placeholder="Filter description or amount..." class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+            <button id="detail-toggle-hidden-btn" onclick="toggleDetailAccountHidden()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition border">
+              <!-- Dynamically populated -->
+            </button>
+            <button onclick="openEditCurrentAccountModal()" class="flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white px-3 py-2 rounded-xl text-xs font-semibold transition border border-slate-800">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+              <span>Edit Account</span>
+            </button>
+            <button onclick="openAddTransactionForAccount()" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition shadow-lg">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add Transaction</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Financial Metric Cards (5 Cards) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          <!-- Starting Balance -->
+          <div class="bento-kpi rounded-2xl p-4 flex flex-col justify-between relative group">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="text-[11px] uppercase tracking-wider font-semibold">Starting Balance</span>
+              <button onclick="openEditStartingBalancePrompt()" class="text-slate-500 hover:text-emerald-400 p-1 rounded transition" title="Quick Edit Starting Balance">
+                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
-            <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition" title="By default only Pending transactions are shown. Check to also show Paid & Received items.">
-              <input type="checkbox" id="detail-tx-show-settled" onchange="loadAccountDetailTransactions()" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer">
-              <span>Show Paid / Received</span>
-            </label>
-            <div class="flex items-center space-x-1.5">
-              <input type="date" id="detail-tx-filter-start" onchange="loadAccountDetailTransactions()" class="bg-slate-950 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none font-mono">
-              <span class="text-slate-400 text-xs">to</span>
-              <input type="date" id="detail-tx-filter-end" onchange="loadAccountDetailTransactions()" class="bg-slate-950 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none font-mono">
+            <div class="my-2">
+              <div id="detail-stat-starting-balance" class="text-xl font-bold font-mono text-white">$0.00</div>
             </div>
-            <button onclick="resetDetailTxFilters()" class="px-2.5 py-1.5 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition">
-              Reset
-            </button>
-          </div>
-        </div>
-
-        <!-- Bulk Actions Floating Bar (Shown when account ledger transactions are selected) -->
-        <div id="detail-tx-bulk-bar" class="hidden items-center justify-between bg-emerald-950/95 border-b border-emerald-500/30 px-4 py-2.5 shadow-xl transition-all">
-          <div class="flex items-center space-x-3">
-            <span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs" id="detail-tx-bulk-count">0</span>
-            <span class="text-xs font-semibold text-white">selected</span>
-            <button type="button" onclick="clearSelectedDetailTransactions()" class="text-[11px] text-slate-400 hover:text-white underline underline-offset-2 ml-1">Deselect all</button>
-            <span class="text-[10px] text-slate-500 hidden sm:inline ml-2">(Tip: Shift+Click to select a range)</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button type="button" onclick="bulkSetDetailTxStatus('cleared')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow transition" title="Mark selected transactions as Paid (expenses) or Received (income)">
-              <i data-lucide="check-check" class="w-4 h-4"></i>
-              <span>Mark as Paid / Received</span>
-            </button>
-            <button type="button" onclick="bulkSetDetailTxStatus('pending')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition" title="Restore selected transactions back to Pending">
-              <i data-lucide="clock" class="w-4 h-4"></i>
-              <span>Mark as Pending</span>
-            </button>
-            <button type="button" onclick="bulkDeleteSelectedDetailTransactions()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500 hover:text-white text-rose-300 border border-rose-500/30 transition" title="Delete selected transactions">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              <span>Delete</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Table with per-column sorting -->
-        <div class="overflow-x-auto max-h-[600px] custom-scrollbar">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/90 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800 select-none">
-              <tr>
-                <th class="py-3 px-3 w-10 text-center">
-                  <input type="checkbox" id="detail-tx-select-all" onchange="toggleSelectAllDetailTransactions(this.checked)" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select all visible transactions in this account">
-                </th>
-                <th onclick="toggleSortDetailTx('date')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Date">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-detail-date">Date</span>
-                    <span id="sort-icon-detail-date" class="text-emerald-400 font-bold text-[11px]">▲</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDetailTx('description')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Description">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-detail-description">Description / Memo</span>
-                    <span id="sort-icon-detail-description" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDetailTx('amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Amount">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-detail-amount">Amount</span>
-                    <span id="sort-icon-detail-amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDetailTx('balance')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Running Balance">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-detail-balance">Running Balance</span>
-                    <span id="sort-icon-detail-balance" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortDetailTx('status')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Status">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-detail-status">Status</span>
-                    <span id="sort-icon-detail-status" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="detail-tx-table-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 4. RECURRING RULES VIEW ==================== -->
-    <section id="view-recurring" class="space-y-6 hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-xl font-bold text-white">Recurring Schedules</h2>
-          <p class="text-xs text-slate-400">Project recurring paychecks, rent, loan repayments, and monthly subscriptions into daily cash forecasts.</p>
-        </div>
-        <button onclick="openModal('modal-add-recurring')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-4 py-2 rounded-xl text-xs transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>New Recurring Rule</span>
-        </button>
-      </div>
-
-      <!-- Recurring Rules Table -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-        <div class="overflow-x-auto max-h-[600px] custom-scrollbar">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800 select-none">
-              <tr>
-                <th onclick="toggleSortRecurring('description')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Description">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-rec-description">Description</span>
-                    <span id="sort-icon-rec-description" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortRecurring('account_name')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Account">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-rec-account_name">Account</span>
-                    <span id="sort-icon-rec-account_name" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortRecurring('amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group" title="Click to sort by Amount">
-                  <div class="flex items-center justify-end space-x-1.5">
-                    <span id="th-rec-amount">Amount</span>
-                    <span id="sort-icon-rec-amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortRecurring('frequency')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Frequency">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-rec-frequency">Frequency</span>
-                    <span id="sort-icon-rec-frequency" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortRecurring('start_date')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Start Date">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-rec-start_date">Start / End Date</span>
-                    <span id="sort-icon-rec-start_date" class="text-emerald-400 font-bold text-[11px]">▲</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortRecurring('active')" class="py-3 px-4 cursor-pointer hover:text-white transition group" title="Click to sort by Status">
-                  <div class="flex items-center space-x-1.5">
-                    <span id="th-rec-active">Status</span>
-                    <span id="sort-icon-rec-active" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
-                  </div>
-                </th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="recurring-table-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 5. EXCEL IMPORT / EXPORT VIEW ==================== -->
-    <section id="view-import" class="space-y-6 hidden">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <!-- Upload Card -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-4">
-          <div class="flex items-center space-x-2 text-emerald-400">
-            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
-            <h3 class="text-base font-semibold text-white">Import Excel or CSV</h3>
-          </div>
-          <p class="text-xs text-slate-400">
-            Select an Excel sheet (<span class="text-slate-200">.xlsx, .xls</span>) or <span class="text-slate-200">.csv</span> file. Columns are auto-detected for Date, Account Number, Amount, and Description.
-          </p>
-
-          <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-xl p-8 text-center cursor-pointer transition bg-slate-950/50">
-            <i data-lucide="file-spreadsheet" class="w-10 h-10 mx-auto text-slate-500 mb-2"></i>
-            <p class="text-xs text-slate-300 font-medium">Click to browse or drag & drop file here</p>
-            <p class="text-[11px] text-slate-500 mt-1">Supports XLSX, XLS, CSV</p>
-            <input type="file" id="file-input" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFileSelect(event)">
+            <span class="text-[10px] text-slate-400 font-sans">Baseline reserve balance</span>
           </div>
 
-          <div class="flex items-center justify-between pt-2">
-            <label class="flex items-center space-x-2 text-xs text-slate-300">
-              <input type="checkbox" id="import-auto-create" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
-              <span>Auto-create missing accounts if not in database</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Download Templates & Backup Card -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-4 flex flex-col justify-between">
-          <div class="space-y-3">
-            <div class="flex items-center space-x-2 text-blue-400">
-              <i data-lucide="download" class="w-5 h-5"></i>
-              <h3 class="text-base font-semibold text-white">Starter Template & Backup Export</h3>
+          <!-- Total Inflows (+) -->
+          <div class="bento-kpi rounded-2xl p-4 flex flex-col justify-between">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="text-[11px] uppercase tracking-wider font-semibold">Total Inflows (+)</span>
+              <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i>
             </div>
-            <p class="text-xs text-slate-400">
-              Download a ready-to-use Excel template with sample transactions and accounts, or export your complete transaction ledger.
-            </p>
+            <div class="my-2">
+              <div id="detail-stat-inflows" class="text-xl font-bold font-mono text-emerald-400">+$0.00</div>
+            </div>
+            <span class="text-[10px] text-slate-400 font-sans">Income & Deposits</span>
           </div>
 
-          <div class="space-y-3 pt-4">
-            <button onclick="downloadExcelTemplate()" class="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-2.5 px-4 rounded-xl text-xs border border-slate-700 transition">
-              <i data-lucide="file-down" class="w-4 h-4 text-emerald-400"></i>
-              <span>Download Starter Excel Template (.xlsx)</span>
-            </button>
-            <button onclick="exportTransactionsExcel()" class="w-full flex items-center justify-center space-x-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-medium py-2.5 px-4 rounded-xl text-xs border border-emerald-500/30 transition">
-              <i data-lucide="download-cloud" class="w-4 h-4"></i>
-              <span>Export Full Ledger to Excel (.xlsx)</span>
-            </button>
+          <!-- Total Outflows (-) -->
+          <div class="bento-kpi rounded-2xl p-4 flex flex-col justify-between">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="text-[11px] uppercase tracking-wider font-semibold">Total Outflows (-)</span>
+              <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i>
+            </div>
+            <div class="my-2">
+              <div id="detail-stat-outflows" class="text-xl font-bold font-mono text-rose-400">-$0.00</div>
+            </div>
+            <span class="text-[10px] text-slate-400 font-sans">Expenses & Debits</span>
+          </div>
+
+          <!-- Net Ledger Activity -->
+          <div class="bento-kpi rounded-2xl p-4 flex flex-col justify-between">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="text-[11px] uppercase tracking-wider font-semibold">Net Activity</span>
+              <i data-lucide="activity" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <div class="my-2">
+              <div id="detail-stat-net" class="text-xl font-bold font-mono text-white">$0.00</div>
+            </div>
+            <span id="detail-stat-tx-count" class="text-[10px] text-slate-400 font-sans">0 transactions</span>
+          </div>
+
+          <!-- Current Calculated Balance -->
+          <div class="bento-kpi border-emerald-500/30 rounded-2xl p-4 flex flex-col justify-between bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30 col-span-2 sm:col-span-1">
+            <div class="flex items-center justify-between text-emerald-300">
+              <span class="text-[11px] uppercase tracking-wider font-semibold">Calculated Balance</span>
+              <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <div class="my-2">
+              <div id="detail-stat-calculated-balance" class="text-2xl font-extrabold font-mono text-emerald-400">$0.00</div>
+            </div>
+            <span class="text-[10px] text-emerald-300/70 font-sans">Starting Bal + Net Activity</span>
           </div>
         </div>
 
-      </div>
-
-      <!-- Import Preview Modal/Section -->
-      <div id="import-preview-section" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl hidden space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div>
+        <!-- Quick Add Row Form -->
+        <div class="glass-card rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
             <div class="flex items-center space-x-2">
-              <h3 class="text-base font-bold text-white" id="import-preview-title">Workbook Preview</h3>
-              <span id="import-preview-type-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Multi-Sheet</span>
+              <span class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+              </span>
+              <h3 class="text-sm font-semibold text-white">Quick Add Transaction to This Account</h3>
+              <span class="text-[11px] text-slate-400 font-sans hidden sm:inline">(Fast-entry row for instant insertion)</span>
             </div>
-            <p class="text-xs text-slate-400 mt-1" id="import-preview-stats">Loading summary...</p>
+            <span class="text-[11px] text-slate-400 font-mono hidden md:inline">Account #<span id="quick-tx-acc-id-label">--</span></span>
           </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="cancelImportPreview()" class="px-3.5 py-2 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition">Cancel</button>
-            <button onclick="commitFullImport()" id="btn-commit-import" class="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-lg transition flex items-center space-x-1.5">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              <span id="btn-commit-import-text">Confirm & Import</span>
+
+          <form onsubmit="submitQuickAddDetailTx(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            <div class="sm:col-span-3">
+              <label class="block text-[11px] text-slate-400 font-medium mb-1">Date</label>
+              <input type="date" id="quick-tx-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] text-slate-400 font-medium mb-1">Flow</label>
+              <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button type="button" id="btn-quick-sign-expense" onclick="setQuickTxSign(-1)" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                  - Outflow
+                </button>
+                <button type="button" id="btn-quick-sign-income" onclick="setQuickTxSign(1)" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-400 hover:text-emerald-400 border border-transparent">
+                  + Inflow
+                </button>
+              </div>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] text-slate-400 font-medium mb-1">Amount ($)</label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-slate-400 text-xs font-mono">$</span>
+                <input type="number" id="quick-tx-amount" step="0.01" min="0.01" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-7 pr-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+              </div>
+            </div>
+
+            <div class="sm:col-span-3">
+              <label class="block text-[11px] text-slate-400 font-medium mb-1">Description / Memo</label>
+              <input type="text" id="quick-tx-desc" placeholder="e.g. Cleared bill, payroll, loan payment..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div class="sm:col-span-2">
+              <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition flex items-center justify-center space-x-1.5 shadow-md">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Add Row</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Full Transactions Ledger for this Account -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <div class="p-4 border-b border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-base font-bold text-white">Account Ledger Records</h3>
+              <p id="detail-tx-table-count" class="text-xs text-slate-400">Loading records...</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="relative min-w-[200px]">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+                <input type="text" id="detail-tx-search" oninput="debounceDetailTxSearch()" placeholder="Filter description or amount..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+              </div>
+              <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-emerald-500/50 transition">
+                <input type="checkbox" id="detail-tx-show-settled" onchange="loadAccountDetailTransactions()" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer">
+                <span>Show Paid / Received</span>
+              </label>
+              <div class="flex items-center space-x-1.5">
+                <input type="date" id="detail-tx-filter-start" onchange="loadAccountDetailTransactions()" class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none font-mono">
+                <span class="text-slate-400 text-xs">to</span>
+                <input type="date" id="detail-tx-filter-end" onchange="loadAccountDetailTransactions()" class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none font-mono">
+              </div>
+              <button onclick="resetDetailTxFilters()" class="px-2.5 py-1.5 text-xs text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl transition">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Bulk Actions Floating Bar -->
+          <div id="detail-tx-bulk-bar" class="hidden items-center justify-between bg-emerald-950/95 border-b border-emerald-500/30 px-4 py-2.5 shadow-xl transition-all">
+            <div class="flex items-center space-x-3">
+              <span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-xs" id="detail-tx-bulk-count">0</span>
+              <span class="text-xs font-semibold text-white">selected</span>
+              <button type="button" onclick="clearSelectedDetailTransactions()" class="text-[11px] text-slate-400 hover:text-white underline underline-offset-2 ml-1">Deselect all</button>
+              <span class="text-[10px] text-slate-500 hidden sm:inline ml-2">(Tip: Shift+Click to select a range)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button type="button" onclick="bulkSetDetailTxStatus('cleared')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow transition">
+                <i data-lucide="check-check" class="w-4 h-4"></i>
+                <span>Mark as Paid / Received</span>
+              </button>
+              <button type="button" onclick="bulkSetDetailTxStatus('pending')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                <span>Mark as Pending</span>
+              </button>
+              <button type="button" onclick="bulkDeleteSelectedDetailTransactions()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 hover:bg-rose-500 hover:text-white text-rose-300 border border-rose-500/30 transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-[600px] custom-scrollbar">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/90 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800/90 select-none backdrop-blur">
+                <tr>
+                  <th class="py-3 px-3 w-10 text-center">
+                    <input type="checkbox" id="detail-tx-select-all" onchange="toggleSelectAllDetailTransactions(this.checked)" class="rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select all visible transactions in this account">
+                  </th>
+                  <th onclick="toggleSortDetailTx('date')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-detail-date">Date</span>
+                      <span id="sort-icon-detail-date" class="text-emerald-400 font-bold text-[11px]">▲</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDetailTx('description')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-detail-description">Description / Memo</span>
+                      <span id="sort-icon-detail-description" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDetailTx('amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-detail-amount">Amount</span>
+                      <span id="sort-icon-detail-amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDetailTx('balance')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-detail-balance">Running Balance</span>
+                      <span id="sort-icon-detail-balance" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortDetailTx('status')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-detail-status">Status</span>
+                      <span id="sort-icon-detail-status" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="detail-tx-table-tbody" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 4. RECURRING RULES VIEW ==================== -->
+      <section id="view-recurring" class="space-y-6 hidden view-animate">
+        <div class="glass-card rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center space-x-3.5">
+            <div class="p-3 rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+              <i data-lucide="repeat" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-white">Recurring Schedules</h2>
+              <p class="text-xs text-slate-400">Automate paychecks, rent, loan repayments, and monthly subscriptions into your cash forecast.</p>
+            </div>
+          </div>
+          <button onclick="openModal('modal-add-recurring')" class="flex items-center space-x-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-500/15">
+            <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
+            <span>New Recurring Rule</span>
+          </button>
+        </div>
+
+        <!-- Recurring Rules Table -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto max-h-[600px] custom-scrollbar">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/90 text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-800/90 select-none backdrop-blur">
+                <tr>
+                  <th onclick="toggleSortRecurring('description')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-rec-description">Description</span>
+                      <span id="sort-icon-rec-description" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortRecurring('account_name')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-rec-account_name">Account</span>
+                      <span id="sort-icon-rec-account_name" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortRecurring('amount')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1.5">
+                      <span id="th-rec-amount">Amount</span>
+                      <span id="sort-icon-rec-amount" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortRecurring('frequency')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-rec-frequency">Frequency</span>
+                      <span id="sort-icon-rec-frequency" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortRecurring('start_date')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-rec-start_date">Start / End Date</span>
+                      <span id="sort-icon-rec-start_date" class="text-emerald-400 font-bold text-[11px]">▲</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortRecurring('active')" class="py-3 px-4 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1.5">
+                      <span id="th-rec-active">Status</span>
+                      <span id="sort-icon-rec-active" class="text-slate-600 group-hover:text-slate-400 text-[11px]">↕</span>
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recurring-table-tbody" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 5. EXCEL IMPORT / EXPORT VIEW ==================== -->
+      <section id="view-import" class="space-y-6 hidden view-animate">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Upload Card -->
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center space-x-2.5 text-emerald-400">
+              <div class="p-2 rounded-xl bg-emerald-500/15 ring-1 ring-emerald-500/30">
+                <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-white">Import Excel or CSV</h3>
+                <p class="text-[11px] text-slate-400">Multi-sheet workbooks & single ledgers supported</p>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Select an Excel workbook (<span class="text-slate-200 font-mono">.xlsx, .xls</span>) or <span class="text-slate-200 font-mono">.csv</span> file. Columns are auto-detected for Date, Account Number, Amount, and Description.
+            </p>
+
+            <div id="drop-zone" class="border-2 border-dashed border-slate-700/80 hover:border-emerald-500 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-950/60 group">
+              <div class="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-3 group-hover:scale-105 group-hover:border-emerald-500/40 transition">
+                <i data-lucide="file-spreadsheet" class="w-6 h-6 text-emerald-400"></i>
+              </div>
+              <p class="text-xs text-slate-200 font-semibold">Click to browse or drag & drop workbook here</p>
+              <p class="text-[11px] text-slate-500 mt-1">Supports XLSX, XLS, CSV</p>
+              <input type="file" id="file-input" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFileSelect(event)">
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                <input type="checkbox" id="import-auto-create" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
+                <span>Auto-create missing accounts if not in database</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Download Templates & Backup Card -->
+          <div class="glass-card rounded-2xl p-6 space-y-4 flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-center space-x-2.5 text-blue-400">
+                <div class="p-2 rounded-xl bg-blue-500/15 ring-1 ring-blue-500/30">
+                  <i data-lucide="download" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-white">Starter Template & Full Backup</h3>
+                  <p class="text-[11px] text-slate-400">Instant Excel snapshots of your database</p>
+                </div>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Download a ready-to-use Excel template with sample transactions and accounts, or export your complete transaction ledger for offline analysis or backup.
+              </p>
+            </div>
+
+            <div class="space-y-3 pt-4">
+              <button onclick="downloadExcelTemplate()" class="w-full flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold py-3 px-4 rounded-xl text-xs border border-slate-800 transition">
+                <i data-lucide="file-down" class="w-4 h-4 text-emerald-400"></i>
+                <span>Download Starter Excel Template (.xlsx)</span>
+              </button>
+              <button onclick="exportTransactionsExcel()" class="w-full flex items-center justify-center space-x-2 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-bold py-3 px-4 rounded-xl text-xs border border-emerald-500/30 transition">
+                <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                <span>Export Full Ledger to Excel (.xlsx)</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Import Preview Section -->
+        <div id="import-preview-section" class="glass-card rounded-2xl p-6 hidden space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="text-base font-bold text-white" id="import-preview-title">Workbook Preview</h3>
+                <span id="import-preview-type-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Multi-Sheet</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1" id="import-preview-stats">Loading summary...</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="cancelImportPreview()" class="px-3.5 py-2 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition">Cancel</button>
+              <button onclick="commitFullImport()" id="btn-commit-import" class="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-lg transition flex items-center space-x-1.5">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span id="btn-commit-import-text">Confirm & Import</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Import Options: Merge vs Overwrite & Reserves -->
+          <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block text-slate-300 font-semibold mb-2">Import Mode</label>
+              <div class="space-y-2">
+                <label class="flex items-start space-x-3 cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700">
+                  <input type="radio" name="import-mode" value="merge" checked onchange="updateImportModeUI()" class="mt-0.5 text-emerald-500 focus:ring-0">
+                  <div>
+                    <span class="font-medium text-white block">Merge with Existing Data (Recommended)</span>
+                    <span class="text-[11px] text-slate-400 block">Appends new transactions and updates/creates accounts without deleting current history.</span>
+                  </div>
+                </label>
+                <label class="flex items-start space-x-3 cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-rose-500/40">
+                  <input type="radio" name="import-mode" value="overwrite" onchange="updateImportModeUI()" class="mt-0.5 text-rose-500 focus:ring-0">
+                  <div>
+                    <span class="font-medium text-rose-300 block">Clean Slate / Overwrite Database</span>
+                    <span class="text-[11px] text-slate-400 block">Wipes existing transactions and completely replaces the ledger with this workbook.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="space-y-3 flex flex-col justify-between">
+              <div>
+                <label class="block text-slate-300 font-semibold mb-2">Detected Settings & Options</label>
+                <div id="import-reserves-option" class="hidden p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 mb-2">
+                  <label class="flex items-center space-x-2 cursor-pointer text-emerald-300">
+                    <input type="checkbox" id="import-apply-reserves" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
+                    <span class="font-medium" id="import-reserves-label">Apply Starting Cash Reserves</span>
+                  </label>
+                  <p class="text-[11px] text-slate-400 mt-1 ml-5">Sets your base cash on hand and baseline date to the liquid bank balances found in the workbook.</p>
+                </div>
+
+                <label class="flex items-center space-x-2 text-slate-300 cursor-pointer pt-1">
+                  <input type="checkbox" id="import-auto-create-missing" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
+                  <span>Auto-create missing accounts found in transaction sheets</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="import-errors-container" class="hidden p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs max-h-36 overflow-y-auto space-y-1"></div>
+
+          <div class="border-b border-slate-800 flex space-x-4 text-xs font-medium">
+            <button type="button" onclick="switchImportPreviewTab('tx')" id="tab-btn-prev-tx" class="pb-2 border-b-2 border-emerald-400 text-emerald-400">
+              Transactions (<span id="prev-tx-count">0</span>)
+            </button>
+            <button type="button" onclick="switchImportPreviewTab('acc')" id="tab-btn-prev-acc" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-white">
+              Accounts (<span id="prev-acc-count">0</span>)
+            </button>
+            <button type="button" onclick="switchImportPreviewTab('sheets')" id="tab-btn-prev-sheets" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-white">
+              Sheets Summary (<span id="prev-sheets-count">0</span>)
             </button>
           </div>
-        </div>
 
-        <!-- Import Options: Merge vs Overwrite & Reserves -->
-        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div>
-            <label class="block text-slate-300 font-semibold mb-2">Import Mode</label>
-            <div class="space-y-2">
-              <label class="flex items-start space-x-3 cursor-pointer p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700">
-                <input type="radio" name="import-mode" value="merge" checked onchange="updateImportModeUI()" class="mt-0.5 text-emerald-500 focus:ring-0">
-                <div>
-                  <span class="font-medium text-white block">Merge with Existing Data (Recommended)</span>
-                  <span class="text-[11px] text-slate-400 block">Appends new transactions and updates/creates accounts without deleting current history.</span>
-                </div>
-              </label>
-              <label class="flex items-start space-x-3 cursor-pointer p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-rose-500/40">
-                <input type="radio" name="import-mode" value="overwrite" onchange="updateImportModeUI()" class="mt-0.5 text-rose-500 focus:ring-0">
-                <div>
-                  <span class="font-medium text-rose-300 block">Clean Slate / Overwrite Database</span>
-                  <span class="text-[11px] text-slate-400 block">Wipes existing transactions and completely replaces the ledger with this workbook.</span>
-                </div>
-              </label>
-            </div>
+          <div id="prev-tab-tx" class="overflow-x-auto max-h-80 custom-scrollbar">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 select-none">
+                <tr>
+                  <th onclick="toggleSortPreview('tx', 'transaction_date')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Date</span>
+                      <span id="sort-icon-prev-tx-transaction_date" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('tx', 'account_id')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Account #</span>
+                      <span id="sort-icon-prev-tx-account_id" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('tx', 'account_name')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Account Name</span>
+                      <span id="sort-icon-prev-tx-account_name" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('tx', 'transaction_amount')" class="py-2.5 px-3 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1">
+                      <span>Amount</span>
+                      <span id="sort-icon-prev-tx-transaction_amount" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('tx', 'description')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Memo / Source</span>
+                      <span id="sort-icon-prev-tx-description" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="import-preview-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono"></tbody>
+            </table>
           </div>
 
-          <div class="space-y-3 flex flex-col justify-between">
-            <div>
-              <label class="block text-slate-300 font-semibold mb-2">Detected Settings & Options</label>
-              <div id="import-reserves-option" class="hidden p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 mb-2">
-                <label class="flex items-center space-x-2 cursor-pointer text-emerald-300">
-                  <input type="checkbox" id="import-apply-reserves" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
-                  <span class="font-medium" id="import-reserves-label">Apply Starting Cash Reserves</span>
-                </label>
-                <p class="text-[11px] text-slate-400 mt-1 ml-5">Sets your base cash on hand and baseline date to the liquid bank balances found in the workbook.</p>
-              </div>
-
-              <label class="flex items-center space-x-2 text-slate-300 cursor-pointer pt-1">
-                <input type="checkbox" id="import-auto-create-missing" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
-                <span>Auto-create missing accounts found in transaction sheets</span>
-              </label>
-            </div>
+          <div id="prev-tab-acc" class="overflow-x-auto max-h-80 custom-scrollbar hidden">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 select-none">
+                <tr>
+                  <th onclick="toggleSortPreview('acc', 'account_id')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Account #</span>
+                      <span id="sort-icon-prev-acc-account_id" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('acc', 'account_name')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Account Name</span>
+                      <span id="sort-icon-prev-acc-account_name" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('acc', 'type')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Category / Type</span>
+                      <span id="sort-icon-prev-acc-type" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="import-preview-acc-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono"></tbody>
+            </table>
           </div>
+
+          <div id="prev-tab-sheets" class="overflow-x-auto max-h-80 custom-scrollbar hidden">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 select-none">
+                <tr>
+                  <th onclick="toggleSortPreview('sheets', 'sheet_name')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Sheet Name</span>
+                      <span id="sort-icon-prev-sheets-sheet_name" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('sheets', 'role')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Identified Role</span>
+                      <span id="sort-icon-prev-sheets-role" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('sheets', 'record_count')" class="py-2.5 px-3 text-right cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center justify-end space-x-1">
+                      <span>Records Found</span>
+                      <span id="sort-icon-prev-sheets-record_count" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                  <th onclick="toggleSortPreview('sheets', 'status')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
+                    <div class="flex items-center space-x-1">
+                      <span>Status</span>
+                      <span id="sort-icon-prev-sheets-status" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="import-preview-sheets-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono"></tbody>
+            </table>
+          </div>
+
         </div>
+      </section>
 
-        <!-- Validation Warnings Box -->
-        <div id="import-errors-container" class="hidden p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs max-h-36 overflow-y-auto space-y-1"></div>
+    </main>
+  </div>
 
-        <!-- Preview Tabs Navigation -->
-        <div class="border-b border-slate-800 flex space-x-4 text-xs font-medium">
-          <button type="button" onclick="switchImportPreviewTab('tx')" id="tab-btn-prev-tx" class="pb-2 border-b-2 border-emerald-400 text-emerald-400">
-            Transactions (<span id="prev-tx-count">0</span>)
-          </button>
-          <button type="button" onclick="switchImportPreviewTab('acc')" id="tab-btn-prev-acc" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-white">
-            Accounts (<span id="prev-acc-count">0</span>)
-          </button>
-          <button type="button" onclick="switchImportPreviewTab('sheets')" id="tab-btn-prev-sheets" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-white">
-            Sheets Summary (<span id="prev-sheets-count">0</span>)
-          </button>
-        </div>
+  <!-- ==================== MOBILE BOTTOM NAVIGATION ==================== -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 z-30 flex items-center justify-around py-1.5 px-2">
+    <button onclick="switchTab('forecast')" id="mob-tab-forecast" class="flex flex-col items-center py-1 px-3 rounded-xl text-emerald-400">
+      <i data-lucide="line-chart" class="w-4 h-4"></i>
+      <span class="text-[10px] font-medium mt-0.5">Forecast</span>
+    </button>
+    <button onclick="switchTab('transactions')" id="mob-tab-transactions" class="flex flex-col items-center py-1 px-3 rounded-xl text-slate-400">
+      <i data-lucide="receipt" class="w-4 h-4"></i>
+      <span class="text-[10px] font-medium mt-0.5">Ledger</span>
+    </button>
+    <button onclick="switchTab('accounts')" id="mob-tab-accounts" class="flex flex-col items-center py-1 px-3 rounded-xl text-slate-400">
+      <i data-lucide="layers" class="w-4 h-4"></i>
+      <span class="text-[10px] font-medium mt-0.5">Accounts</span>
+    </button>
+    <button onclick="switchTab('recurring')" id="mob-tab-recurring" class="flex flex-col items-center py-1 px-3 rounded-xl text-slate-400">
+      <i data-lucide="repeat" class="w-4 h-4"></i>
+      <span class="text-[10px] font-medium mt-0.5">Recurring</span>
+    </button>
+    <button onclick="switchTab('import')" id="mob-tab-import" class="flex flex-col items-center py-1 px-3 rounded-xl text-slate-400">
+      <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+      <span class="text-[10px] font-medium mt-0.5">Excel</span>
+    </button>
+  </nav>
 
-        <!-- Preview Tab: Transactions -->
-        <div id="prev-tab-tx" class="overflow-x-auto max-h-80 custom-scrollbar">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 select-none">
-              <tr>
-                <th onclick="toggleSortPreview('tx', 'transaction_date')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Date</span>
-                    <span id="sort-icon-prev-tx-transaction_date" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('tx', 'account_id')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Account #</span>
-                    <span id="sort-icon-prev-tx-account_id" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('tx', 'account_name')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Account Name</span>
-                    <span id="sort-icon-prev-tx-account_name" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('tx', 'transaction_amount')" class="py-2.5 px-3 text-right cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center justify-end space-x-1">
-                    <span>Amount</span>
-                    <span id="sort-icon-prev-tx-transaction_amount" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('tx', 'description')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Memo / Source</span>
-                    <span id="sort-icon-prev-tx-description" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="import-preview-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Preview Tab: Accounts -->
-        <div id="prev-tab-acc" class="overflow-x-auto max-h-80 custom-scrollbar hidden">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 select-none">
-              <tr>
-                <th onclick="toggleSortPreview('acc', 'account_id')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Account #</span>
-                    <span id="sort-icon-prev-acc-account_id" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('acc', 'account_name')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Account Name</span>
-                    <span id="sort-icon-prev-acc-account_name" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('acc', 'type')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Category / Type</span>
-                    <span id="sort-icon-prev-acc-type" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="import-preview-acc-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Preview Tab: Sheets Summary -->
-        <div id="prev-tab-sheets" class="overflow-x-auto max-h-80 custom-scrollbar hidden">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 border-b border-slate-800 select-none">
-              <tr>
-                <th onclick="toggleSortPreview('sheets', 'sheet_name')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Sheet Name</span>
-                    <span id="sort-icon-prev-sheets-sheet_name" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('sheets', 'role')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Identified Role</span>
-                    <span id="sort-icon-prev-sheets-role" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('sheets', 'record_count')" class="py-2.5 px-3 text-right cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center justify-end space-x-1">
-                    <span>Records Found</span>
-                    <span id="sort-icon-prev-sheets-record_count" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-                <th onclick="toggleSortPreview('sheets', 'status')" class="py-2.5 px-3 cursor-pointer hover:text-white transition group">
-                  <div class="flex items-center space-x-1">
-                    <span>Status</span>
-                    <span id="sort-icon-prev-sheets-status" class="text-slate-600 group-hover:text-slate-400 text-[10px]">↕</span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="import-preview-sheets-tbody" class="divide-y divide-slate-800 text-slate-300 font-mono">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-
+  <!-- ==================== COMMAND PALETTE (Ctrl+K) ==================== -->
+  <div id="modal-command-palette" onclick="if(event.target===this) closeCommandPalette()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 hidden">
+    <div class="glass-card rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl border border-slate-700/80 view-animate">
+      <div class="flex items-center px-4 py-3 border-b border-slate-800">
+        <i data-lucide="search" class="w-4 h-4 text-emerald-400 mr-3 shrink-0"></i>
+        <input type="text" id="cmd-palette-input" oninput="renderCommandPaletteResults()" onkeydown="handleCommandPaletteKeydown(event)" placeholder="Jump to any account (#101), view, or run a command..." class="w-full bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none">
+        <kbd class="px-1.5 py-0.5 text-[10px] font-mono bg-slate-900 text-slate-400 rounded border border-slate-800 ml-2">ESC</kbd>
       </div>
-    </section>
+      <div id="cmd-palette-results" class="max-h-80 overflow-y-auto p-2 space-y-1 custom-scrollbar text-xs">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="px-4 py-2 bg-slate-950/90 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+        <span><kbd class="font-mono text-slate-400">↑↓</kbd> to navigate · <kbd class="font-mono text-slate-400">Enter</kbd> to select</span>
+        <span>FinBud Command Bar</span>
+      </div>
+    </div>
+  </div>
 
-  </main>
+  <!-- ==================== CUSTOM CONFIRMATION MODAL ==================== -->
+  <div id="modal-confirm" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-slate-700/80 view-animate">
+      <div class="flex items-start space-x-3">
+        <div id="confirm-modal-icon-wrap" class="p-2.5 rounded-xl bg-rose-500/15 text-rose-400 shrink-0">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="confirm-modal-title" class="text-sm font-bold text-white">Confirm Action</h3>
+          <p id="confirm-modal-message" class="text-xs text-slate-400 mt-1 leading-relaxed">Are you sure you want to proceed?</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800/80">
+        <button id="confirm-modal-cancel" class="px-3.5 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition">Cancel</button>
+        <button id="confirm-modal-ok" class="px-4 py-2 text-xs font-bold bg-rose-500 hover:bg-rose-400 text-white rounded-xl shadow-lg transition">Confirm</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- ==================== MODALS ==================== -->
+  <!-- ==================== EXISTING MODALS ==================== -->
 
   <!-- Modal: Add / Edit Transaction -->
   <div id="modal-add-transaction" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 view-animate">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 id="modal-tx-title" class="text-base font-semibold text-white">Add Transaction</h3>
+        <h3 id="modal-tx-title" class="text-base font-bold text-white">Add Transaction</h3>
         <button onclick="closeModal('modal-add-transaction')" class="text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -1223,10 +1623,10 @@
         <div>
           <label class="block text-slate-300 font-medium mb-1">Amount</label>
           <div class="flex items-center space-x-2 mb-1.5">
-            <button type="button" onclick="setTxAmountSign(1)" id="btn-sign-income" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-400 hover:text-emerald-400 border border-transparent">
+            <button type="button" onclick="setTxAmountSign(1)" id="btn-sign-income" class="flex-1 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-400 hover:text-emerald-400 border border-transparent">
               + Income / Inflow
             </button>
-            <button type="button" onclick="setTxAmountSign(-1)" id="btn-sign-expense" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <button type="button" onclick="setTxAmountSign(-1)" id="btn-sign-expense" class="flex-1 py-1.5 rounded-lg text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
               - Expense / Outflow
             </button>
           </div>
@@ -1258,7 +1658,7 @@
 
       <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800">
         <button onclick="closeModal('modal-add-transaction')" class="px-4 py-2 text-xs text-slate-400 hover:text-white bg-slate-800 rounded-xl">Cancel</button>
-        <button onclick="submitTransactionForm()" class="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
+        <button onclick="submitTransactionForm()" class="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
           Save Transaction
         </button>
       </div>
@@ -1267,9 +1667,9 @@
 
   <!-- Modal: Add / Edit Account -->
   <div id="modal-add-account" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 view-animate">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 id="modal-acc-title" class="text-base font-semibold text-white">Add Account</h3>
+        <h3 id="modal-acc-title" class="text-base font-bold text-white">Add Account</h3>
         <button onclick="closeModal('modal-add-account')" class="text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -1330,7 +1730,7 @@
 
       <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800">
         <button onclick="closeModal('modal-add-account')" class="px-4 py-2 text-xs text-slate-400 hover:text-white bg-slate-800 rounded-xl">Cancel</button>
-        <button onclick="submitAccountForm()" class="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
+        <button onclick="submitAccountForm()" class="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
           Save Account
         </button>
       </div>
@@ -1339,9 +1739,9 @@
 
   <!-- Modal: Add / Edit Recurring Rule -->
   <div id="modal-add-recurring" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 view-animate">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 id="modal-rec-title" class="text-base font-semibold text-white">New Recurring Schedule</h3>
+        <h3 id="modal-rec-title" class="text-base font-bold text-white">New Recurring Schedule</h3>
         <button onclick="closeModal('modal-add-recurring')" class="text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -1371,10 +1771,10 @@
         <div>
           <label class="block text-slate-300 font-medium mb-1">Amount</label>
           <div class="flex items-center space-x-2 mb-1.5">
-            <button type="button" onclick="setRecAmountSign(1)" id="btn-rec-sign-income" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-400 hover:text-emerald-400 border border-transparent">
+            <button type="button" onclick="setRecAmountSign(1)" id="btn-rec-sign-income" class="flex-1 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-400 hover:text-emerald-400 border border-transparent">
               + Inflow (Salary)
             </button>
-            <button type="button" onclick="setRecAmountSign(-1)" id="btn-rec-sign-expense" class="flex-1 py-1 rounded-lg text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <button type="button" onclick="setRecAmountSign(-1)" id="btn-rec-sign-expense" class="flex-1 py-1.5 rounded-lg text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
               - Outflow (Bill)
             </button>
           </div>
@@ -1413,7 +1813,7 @@
 
       <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800">
         <button onclick="closeModal('modal-add-recurring')" class="px-4 py-2 text-xs text-slate-400 hover:text-white bg-slate-800 rounded-xl">Cancel</button>
-        <button onclick="submitRecurringForm()" class="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
+        <button onclick="submitRecurringForm()" class="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
           Save Schedule
         </button>
       </div>
@@ -1422,9 +1822,9 @@
 
   <!-- Modal: Settings -->
   <div id="modal-settings" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 view-animate">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-semibold text-white">Cash Forecast Settings</h3>
+        <h3 class="text-base font-bold text-white">Cash Forecast Settings</h3>
         <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -1456,7 +1856,7 @@
 
       <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-800">
         <button onclick="closeModal('modal-settings')" class="px-4 py-2 text-xs text-slate-400 hover:text-white bg-slate-800 rounded-xl">Cancel</button>
-        <button onclick="saveSettings()" class="px-5 py-2 text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
+        <button onclick="saveSettings()" class="px-5 py-2 text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl shadow-md">
           Save Settings
         </button>
       </div>
@@ -1464,13 +1864,12 @@
   </div>
 
   <!-- Toast Notification Container -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 text-xs hidden transition-all duration-300">
+  <div id="toast" class="fixed bottom-5 right-5 z-50 glass-card border border-slate-700/80 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 text-xs hidden transition-all duration-300">
     <i data-lucide="info" id="toast-icon" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toast-message">Action completed</span>
+    <span id="toast-message" class="font-medium">Action completed</span>
   </div>
 
   <!-- Scripts -->
-  <script src="/static/js/app.js?v=20261028_acc2"></script>
+  <script src="/static/js/app.js?v=20261102_multitenant1"></script>
 </body>
 </html>
-

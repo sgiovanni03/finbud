@@ -64,8 +64,85 @@ function showToast(msg, type = "success") {
   }, 3500);
 }
 
+// --- Futuristic HUD Theme Engine ---
+const FUTURISTIC_THEMES = {
+  cyber: {
+    label: "CYBER",
+    name: "Cyber Cyan & Electric Violet",
+    stroke: "#00f0ff",
+    gradTop: "rgba(0, 240, 255, 0.36)",
+    gradMid: "rgba(139, 92, 246, 0.14)",
+    gradBot: "rgba(0, 240, 255, 0.0)",
+    tooltipBorder: "rgba(0, 240, 255, 0.4)"
+  },
+  quantum: {
+    label: "QUANTUM",
+    name: "Quantum Ultraviolet & Plasma",
+    stroke: "#c084fc",
+    gradTop: "rgba(192, 132, 252, 0.38)",
+    gradMid: "rgba(56, 189, 248, 0.14)",
+    gradBot: "rgba(192, 132, 252, 0.0)",
+    tooltipBorder: "rgba(192, 132, 252, 0.4)"
+  },
+  solar: {
+    label: "SOLAR",
+    name: "Solar Gold & Carbon Cyberpunk",
+    stroke: "#fbbf24",
+    gradTop: "rgba(251, 191, 36, 0.36)",
+    gradMid: "rgba(34, 211, 238, 0.12)",
+    gradBot: "rgba(251, 191, 36, 0.0)",
+    tooltipBorder: "rgba(251, 191, 36, 0.4)"
+  },
+  matrix: {
+    label: "MATRIX",
+    name: "Bio-Neon Matrix Mint",
+    stroke: "#00ffa3",
+    gradTop: "rgba(0, 255, 163, 0.36)",
+    gradMid: "rgba(0, 210, 255, 0.13)",
+    gradBot: "rgba(0, 255, 163, 0.0)",
+    tooltipBorder: "rgba(0, 255, 163, 0.4)"
+  }
+};
+
+function setFuturisticTheme(themeKey, silent = false) {
+  const key = FUTURISTIC_THEMES[themeKey] ? themeKey : "cyber";
+  const meta = FUTURISTIC_THEMES[key];
+  document.documentElement.setAttribute("data-theme", key);
+  try {
+    localStorage.setItem("finbud_theme", key);
+  } catch (_) {}
+
+  const labelEl = document.getElementById("active-theme-label");
+  if (labelEl) labelEl.textContent = meta.label;
+
+  document.querySelectorAll("[data-theme-btn]").forEach(btn => {
+    const isAct = btn.getAttribute("data-theme-btn") === key;
+    if (isAct) {
+      btn.classList.add("border-emerald-500/40", "bg-emerald-500/15", "text-white");
+      btn.classList.remove("border-slate-800/80", "bg-slate-900/60", "text-slate-400");
+    } else {
+      btn.classList.remove("border-emerald-500/40", "bg-emerald-500/15", "text-white");
+      btn.classList.add("border-slate-800/80", "bg-slate-900/60", "text-slate-400");
+    }
+  });
+
+  if (forecastData) {
+    renderForecastChart();
+  }
+  if (!silent) {
+    showToast(`Theme switched to ${meta.name}`);
+  }
+}
+
 // --- Initialization ---
 document.addEventListener("DOMContentLoaded", async () => {
+  // Restore saved futuristic theme (default: 'cyber')
+  let savedTheme = "cyber";
+  try {
+    savedTheme = localStorage.getItem("finbud_theme") || "cyber";
+  } catch (_) {}
+  setFuturisticTheme(savedTheme, true);
+
   // Set default dates
   const today = new Date();
   const yyyy = today.getFullYear();
@@ -92,6 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateAccountsSortUI();
   updateRecurringSortUI();
   updateDailySortUI();
+  await loadCurrentUser();
   await loadSettings();
   await loadAccounts();
   await loadForecast();
@@ -101,12 +179,59 @@ document.addEventListener("DOMContentLoaded", async () => {
   lucide.createIcons();
 });
 
-// Tab Switching
+async function loadCurrentUser() {
+  try {
+    const res = await fetch("/api/auth/me");
+    if (!res.ok) return;
+    const me = await res.json();
+    const nameEl = document.getElementById("user-display-name");
+    const emailEl = document.getElementById("user-email-label");
+    const badgeEl = document.getElementById("user-vault-badge");
+    const avatarBox = document.getElementById("user-avatar-box");
+    const actionBtn = document.getElementById("user-auth-action-btn");
+
+    if (nameEl) nameEl.textContent = me.name || "User";
+    if (emailEl) emailEl.textContent = me.email || "";
+    if (badgeEl) badgeEl.textContent = me.vault_label || "Vault";
+
+    if (me.authenticated) {
+      if (avatarBox) {
+        if (me.avatar) {
+          avatarBox.innerHTML = `<img src="${escapeHtml(me.avatar)}" alt="" class="w-full h-full object-cover">`;
+        } else {
+          const initials = (me.name || me.email || "U").trim().slice(0, 2).toUpperCase();
+          avatarBox.textContent = initials;
+        }
+      }
+      if (actionBtn) {
+        actionBtn.href = "/logout";
+        actionBtn.title = "Sign Out / Switch Vault";
+        actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i>`;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to load user profile:", e);
+  }
+}
+
+// Tab Switching & Header Context
+const VIEW_META = {
+  'forecast': { title: 'Cash Flow Forecast', subtitle: 'Real-time accumulator & runway trajectory' },
+  'transactions': { title: 'Transactions Ledger', subtitle: 'Search, filter, and reconcile pending & settled entries' },
+  'accounts': { title: 'Chart of Accounts', subtitle: 'Grouped accounts, starting reserves, and net balances' },
+  'account-detail': { title: 'Account Ledger Detail', subtitle: 'Individual account reconciliation & running balance' },
+  'recurring': { title: 'Recurring Rules', subtitle: 'Automated paychecks, bills, and subscription schedules' },
+  'import': { title: 'Excel Import & Export', subtitle: 'Multi-sheet workbook ingestion & full ledger backups' }
+};
+
 function switchTab(tabName) {
   const tabs = ['forecast', 'transactions', 'accounts', 'account-detail', 'recurring', 'import'];
   tabs.forEach(t => {
     const view = document.getElementById(`view-${t}`);
     const btn = document.getElementById(`tab-btn-${t}`);
+    const mobBtn = document.getElementById(`mob-tab-${t}`);
+    const isActive = (t === tabName || (tabName === 'account-detail' && t === 'accounts'));
+
     if (view) {
       if (t === tabName) {
         view.classList.remove("hidden");
@@ -115,15 +240,28 @@ function switchTab(tabName) {
       }
     }
     if (btn) {
-      if (t === tabName || (tabName === 'account-detail' && t === 'accounts')) {
-        btn.classList.add("border-emerald-400", "text-emerald-400");
-        btn.classList.remove("border-transparent", "text-slate-400");
+      if (isActive) {
+        btn.classList.add("nav-item-active");
+        btn.classList.remove("text-slate-400");
       } else {
-        btn.classList.remove("border-emerald-400", "text-emerald-400");
-        btn.classList.add("border-transparent", "text-slate-400");
+        btn.classList.remove("nav-item-active");
+        btn.classList.add("text-slate-400");
+      }
+    }
+    if (mobBtn) {
+      if (isActive) {
+        mobBtn.className = "flex flex-col items-center py-1 px-3 rounded-xl text-emerald-400 bg-emerald-500/10";
+      } else {
+        mobBtn.className = "flex flex-col items-center py-1 px-3 rounded-xl text-slate-400 hover:text-slate-200";
       }
     }
   });
+
+  const meta = VIEW_META[tabName] || VIEW_META['forecast'];
+  const titleEl = document.getElementById("header-view-title");
+  const subEl = document.getElementById("header-view-subtitle");
+  if (titleEl) titleEl.textContent = meta.title;
+  if (subEl) subEl.textContent = meta.subtitle;
 
   if (tabName === 'forecast' && chartInstance) {
     chartInstance.resize();
@@ -336,6 +474,10 @@ async function loadAccounts() {
       }
     }
 
+    // Update sidebar badge
+    const accBadge = document.getElementById("nav-badge-acc");
+    if (accBadge) accBadge.textContent = accounts.length;
+
     renderAccountsTable();
     updateAccBulkActionBar();
   } catch (err) {
@@ -345,6 +487,44 @@ async function loadAccounts() {
 
 let accSortBy = "account_id";
 let accSortDir = "asc";
+let accountsViewMode = "grouped"; // 'grouped' | 'flat'
+
+function setAccountsViewMode(mode) {
+  accountsViewMode = mode;
+  const gBtn = document.getElementById("btn-acc-view-grouped");
+  const fBtn = document.getElementById("btn-acc-view-flat");
+  if (gBtn && fBtn) {
+    if (mode === "grouped") {
+      gBtn.className = "px-2.5 py-1 rounded-lg font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition";
+      fBtn.className = "px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white border border-transparent transition";
+    } else {
+      fBtn.className = "px-2.5 py-1 rounded-lg font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition";
+      gBtn.className = "px-2.5 py-1 rounded-lg font-medium text-slate-400 hover:text-white border border-transparent transition";
+    }
+  }
+  renderAccountsTable();
+}
+
+function classifyAccountGroup(a) {
+  const id = parseInt(a.account_id) || 0;
+  const t = (a.type || "").toLowerCase();
+  if (t.includes("cash") || t.includes("asset") || (id >= 100 && id <= 149)) {
+    return { key: "100_cash", label: "100s · Cash & Liquid Reserves", color: "text-emerald-400", badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" };
+  }
+  if (t.includes("receivable") || (id >= 150 && id <= 199)) {
+    return { key: "150_ar", label: "150s · Accounts Receivable", color: "text-teal-400", badge: "bg-teal-500/15 text-teal-300 border-teal-500/30" };
+  }
+  if (t.includes("credit card") || t.includes("loan") || t.includes("mortgage") || t.includes("installment") || (id >= 200 && id <= 299)) {
+    return { key: "200_debt", label: "200s · Credit Cards & Loan Liabilities", color: "text-amber-400", badge: "bg-amber-500/15 text-amber-300 border-amber-500/30" };
+  }
+  if (t.includes("revenue") || t.includes("income") || (id >= 400 && id <= 499)) {
+    return { key: "400_rev", label: "400s · Revenues & Income Streams", color: "text-cyan-400", badge: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30" };
+  }
+  if (t.includes("expense") || t.includes("subscription") || (id >= 500 && id <= 599)) {
+    return { key: "500_exp", label: "500s · Operating Expenses & Subscriptions", color: "text-rose-400", badge: "bg-rose-500/15 text-rose-300 border-rose-500/30" };
+  }
+  return { key: "900_other", label: "Other Accounts", color: "text-slate-300", badge: "bg-slate-800 text-slate-300 border-slate-700" };
+}
 
 function toggleSortAccounts(col) {
   if (accSortBy === col) {
@@ -472,9 +652,12 @@ async function bulkDeleteSelectedAccounts() {
   if (ids.length === 0) return;
 
   const count = ids.length;
-  if (!confirm(`Are you sure you want to delete ${count} selected account(s)? This will also remove any linked transactions and recurring rules for these accounts.`)) {
-    return;
-  }
+  const confirmed = await askConfirm(
+    `Delete ${count} Account${count > 1 ? 's' : ''}?`,
+    `Are you sure you want to delete ${count} selected account(s)? This will also remove any linked transactions and recurring rules for these accounts.`,
+    `Delete ${count} Account${count > 1 ? 's' : ''}`
+  );
+  if (!confirmed) return;
 
   try {
     const res = await fetch("/api/accounts/bulk-delete", {
@@ -503,72 +686,134 @@ async function bulkDeleteSelectedAccounts() {
   }
 }
 
+function renderSingleAccountRow(a) {
+  const total = parseFloat(a.total_amount) || 0;
+  const totalColor = total >= 0 ? "text-emerald-400" : "text-rose-400";
+  const isHidden = a.is_hidden === 1 || a.is_hidden === true;
+  const startBal = parseFloat(a.starting_balance) || 0;
+  const isCash = (a.type || "").toLowerCase().includes("cash");
+  const isSelected = selectedAccountIds.has(a.account_id);
+  const startBalDisplay = startBal !== 0 
+    ? `<span class="font-bold ${startBal > 0 ? 'text-emerald-400' : 'text-slate-300'}">${formatCurrency(startBal)}</span>`
+    : `<span class="text-slate-600 font-sans text-xs">$0.00</span>`;
+
+  const statusBtn = isHidden
+    ? `<button onclick="event.stopPropagation(); toggleAccountHidden(${a.account_id})" class="inline-flex items-center space-x-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-800/90 text-amber-400 hover:text-emerald-300 border border-amber-500/30 hover:border-emerald-500/40 transition" title="Currently excluded from calculations. Click to include.">
+         <i data-lucide="eye-off" class="w-3.5 h-3.5"></i>
+         <span>Excluded</span>
+       </button>`
+    : `<button onclick="event.stopPropagation(); toggleAccountHidden(${a.account_id})" class="inline-flex items-center space-x-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 hover:bg-amber-500/10 hover:text-amber-300 border border-emerald-500/30 hover:border-amber-500/30 transition" title="Active in calculations. Click to exclude.">
+         <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+         <span>Included</span>
+       </button>`;
+
+  return `
+    <tr id="acc-row-${a.account_id}" onclick="openAccountDetail(${a.account_id})" class="hover:bg-slate-800/50 transition cursor-pointer group ${isSelected ? 'bg-emerald-950/25' : ''}" title="Click to open full editable ledger for Account #${a.account_id}">
+      <td class="py-3 px-3 text-center" onclick="event.stopPropagation()">
+        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="onToggleAccSelect(${a.account_id}, this.checked)" class="rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select account #${a.account_id}">
+      </td>
+      <td class="py-3 px-4 font-semibold font-mono">
+        <button type="button" onclick="openAccountDetail(${a.account_id})" class="text-emerald-400 hover:text-emerald-300 font-bold inline-flex items-center space-x-1 group/btn hover:underline cursor-pointer" title="Open Account #${a.account_id} Ledger">
+          <span>#${a.account_id}</span>
+          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-60 group-hover/btn:opacity-100"></i>
+        </button>
+      </td>
+      <td class="py-3 px-4 font-sans text-slate-200">
+        <button type="button" onclick="openAccountDetail(${a.account_id})" class="text-left font-medium text-slate-100 hover:text-emerald-300 transition cursor-pointer flex items-center space-x-2" title="Open Account #${a.account_id} Ledger">
+          <span class="group-hover:text-emerald-300 font-semibold transition">${escapeHtml(a.account_name)}</span>
+          ${isCash ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono font-semibold">CASH</span>' : ''}
+        </button>
+      </td>
+      <td class="py-3 px-4 font-sans">
+        <span class="inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium ${getCategoryBadgeStyle(a.type)}">
+          ${escapeHtml(a.type || 'General')}
+        </span>
+      </td>
+      <td class="py-3 px-4 text-right">${startBalDisplay}</td>
+      <td class="py-3 px-4 text-center font-sans">${statusBtn}</td>
+      <td class="py-3 px-4 text-right text-slate-300 font-mono">${a.transaction_count}</td>
+      <td class="py-3 px-4 text-right font-bold font-mono ${totalColor}">${formatCurrency(total)}</td>
+      <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+        <button type="button" onclick="openAccountDetail(${a.account_id})" class="inline-flex items-center space-x-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 transition cursor-pointer shadow-sm" title="View & edit account ledger and transactions">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+          <span>View Ledger</span>
+        </button>
+        <button type="button" onclick="event.stopPropagation(); editAccount(${a.account_id})" class="text-slate-400 hover:text-emerald-400 p-1.5 rounded-lg hover:bg-slate-800 transition" title="Edit account settings">
+          <i data-lucide="edit-3" class="w-4 h-4"></i>
+        </button>
+        <button type="button" onclick="event.stopPropagation(); deleteAccount(${a.account_id})" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition" title="Delete account">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      </td>
+    </tr>
+  `;
+}
+
 function renderAccountsTable() {
   const tbody = document.getElementById("accounts-table-tbody");
   sortAccountsInMemory();
 
-  tbody.innerHTML = accounts.map(a => {
-    const total = parseFloat(a.total_amount) || 0;
-    const totalColor = total >= 0 ? "text-emerald-400" : "text-rose-400";
-    const isHidden = a.is_hidden === 1 || a.is_hidden === true;
-    const startBal = parseFloat(a.starting_balance) || 0;
-    const isCash = (a.type || "").toLowerCase().includes("cash");
-    const isSelected = selectedAccountIds.has(a.account_id);
-    const startBalDisplay = startBal !== 0 
-      ? `<span class="font-bold ${startBal > 0 ? 'text-emerald-400' : 'text-slate-300'}">${formatCurrency(startBal)}</span>`
-      : `<span class="text-slate-500 font-sans text-xs">$0.00</span>`;
+  const searchQuery = (document.getElementById("acc-search-input")?.value || "").trim().toLowerCase();
+  const filtered = (accounts || []).filter(a => {
+    if (!searchQuery) return true;
+    return String(a.account_id).includes(searchQuery) ||
+      (a.account_name || "").toLowerCase().includes(searchQuery) ||
+      (a.type || "").toLowerCase().includes(searchQuery);
+  });
 
-    const statusBtn = isHidden
-      ? `<button onclick="event.stopPropagation(); toggleAccountHidden(${a.account_id})" class="inline-flex items-center space-x-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-amber-400 hover:text-emerald-300 border border-amber-500/30 hover:border-emerald-500/40 transition" title="Currently excluded from calculations. Click to include.">
-           <i data-lucide="eye-off" class="w-3.5 h-3.5"></i>
-           <span>Excluded</span>
-         </button>`
-      : `<button onclick="event.stopPropagation(); toggleAccountHidden(${a.account_id})" class="inline-flex items-center space-x-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 hover:bg-amber-500/10 hover:text-amber-300 border border-emerald-500/30 hover:border-amber-500/30 transition" title="Active in calculations. Click to exclude.">
-           <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-           <span>Included</span>
-         </button>`;
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-12 text-slate-500 font-sans">No accounts match your filter.</td></tr>`;
+    updateAccBulkActionBar();
+    return;
+  }
 
-    return `
-      <tr id="acc-row-${a.account_id}" onclick="openAccountDetail(${a.account_id})" class="hover:bg-slate-800/60 transition cursor-pointer group ${isSelected ? 'bg-emerald-950/25' : ''}" title="Click to open full editable ledger for Account #${a.account_id}">
-        <td class="py-3 px-3 text-center" onclick="event.stopPropagation()">
-          <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="onToggleAccSelect(${a.account_id}, this.checked)" class="rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer" title="Select account #${a.account_id}">
-        </td>
-        <td class="py-3 px-4 font-semibold font-mono">
-          <button type="button" onclick="openAccountDetail(${a.account_id})" class="text-emerald-400 hover:text-emerald-300 font-bold inline-flex items-center space-x-1 group/btn hover:underline cursor-pointer" title="Open Account #${a.account_id} Ledger">
-            <span>#${a.account_id}</span>
-            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-60 group-hover/btn:opacity-100"></i>
-          </button>
-        </td>
-        <td class="py-3 px-4 font-sans text-slate-200">
-          <button type="button" onclick="openAccountDetail(${a.account_id})" class="text-left font-medium text-slate-100 hover:text-emerald-300 transition cursor-pointer flex items-center space-x-2" title="Open Account #${a.account_id} Ledger">
-            <span class="group-hover:text-emerald-300 font-semibold transition">${escapeHtml(a.account_name)}</span>
-            ${isCash ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono font-semibold">CASH</span>' : ''}
-          </button>
-        </td>
-        <td class="py-3 px-4 font-sans">
-          <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-medium ${getCategoryBadgeStyle(a.type)}">
-            ${escapeHtml(a.type || 'General')}
-          </span>
-        </td>
-        <td class="py-3 px-4 text-right">${startBalDisplay}</td>
-        <td class="py-3 px-4 text-center font-sans">${statusBtn}</td>
-        <td class="py-3 px-4 text-right text-slate-300 font-mono">${a.transaction_count}</td>
-        <td class="py-3 px-4 text-right font-bold font-mono ${totalColor}">${formatCurrency(total)}</td>
-        <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
-          <button type="button" onclick="openAccountDetail(${a.account_id})" class="inline-flex items-center space-x-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 transition cursor-pointer shadow-sm" title="View & edit account ledger and transactions">
-            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-            <span>View Ledger</span>
-          </button>
-          <button type="button" onclick="event.stopPropagation(); editAccount(${a.account_id})" class="text-slate-400 hover:text-emerald-400 p-1.5 rounded-lg hover:bg-slate-800 transition" title="Edit account settings">
-            <i data-lucide="edit-3" class="w-4 h-4"></i>
-          </button>
-          <button type="button" onclick="event.stopPropagation(); deleteAccount(${a.account_id})" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition" title="Delete account">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join("");
+  if (accountsViewMode === "grouped") {
+    const groupsMap = new Map();
+    const groupOrder = ["100_cash", "150_ar", "200_debt", "400_rev", "500_exp", "900_other"];
+    groupOrder.forEach(k => groupsMap.set(k, { meta: null, items: [] }));
+
+    filtered.forEach(a => {
+      const g = classifyAccountGroup(a);
+      if (!groupsMap.has(g.key)) {
+        groupsMap.set(g.key, { meta: g, items: [] });
+      }
+      const entry = groupsMap.get(g.key);
+      entry.meta = g;
+      entry.items.push(a);
+    });
+
+    let html = "";
+    for (const [, group] of groupsMap.entries()) {
+      if (!group.items.length || !group.meta) continue;
+      const sumStart = group.items.reduce((acc, item) => acc + (parseFloat(item.starting_balance) || 0), 0);
+      const sumNet = group.items.reduce((acc, item) => acc + (parseFloat(item.total_amount) || 0), 0);
+      const sumTx = group.items.reduce((acc, item) => acc + (parseInt(item.transaction_count) || 0), 0);
+      const netColor = sumNet >= 0 ? "text-emerald-400" : "text-rose-400";
+
+      html += `
+        <tr class="bg-slate-950/85 border-y border-slate-800/90 select-none">
+          <td colspan="4" class="py-2 px-4 font-sans">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold ${group.meta.color}">${group.meta.label}</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">${group.items.length} account${group.items.length > 1 ? 's' : ''}</span>
+            </div>
+          </td>
+          <td class="py-2 px-4 text-right font-mono text-[11px] text-slate-400">
+            ${sumStart !== 0 ? `Start: <b class="text-slate-200">${formatCurrency(sumStart)}</b>` : ''}
+          </td>
+          <td class="py-2 px-4"></td>
+          <td class="py-2 px-4 text-right font-mono text-[11px] text-slate-400">${sumTx} tx</td>
+          <td class="py-2 px-4 text-right font-mono text-xs font-bold ${netColor}">${formatCurrency(sumNet)}</td>
+          <td class="py-2 px-4"></td>
+        </tr>
+      `;
+      html += group.items.map(a => renderSingleAccountRow(a)).join("");
+    }
+    tbody.innerHTML = html;
+  } else {
+    tbody.innerHTML = filtered.map(a => renderSingleAccountRow(a)).join("");
+  }
+
   lucide.createIcons();
   updateAccBulkActionBar();
 }
@@ -687,7 +932,12 @@ async function submitAccountForm() {
 async function deleteAccount(accId) {
   const acc = (accounts || []).find(a => a.account_id === accId);
   const name = acc ? ` "${acc.account_name}"` : '';
-  if (!confirm(`Are you sure you want to delete Account #${accId}${name}? This will also delete any linked transactions.`)) return;
+  const confirmed = await askConfirm(
+    `Delete Account #${accId}?`,
+    `Are you sure you want to delete Account #${accId}${name}? This will also delete any linked transactions.`,
+    `Delete Account`
+  );
+  if (!confirmed) return;
   try {
     const res = await fetch(`/api/accounts/${accId}?cascade=true`, { method: "DELETE" });
     if (!res.ok) {
@@ -725,6 +975,14 @@ function setForecastPreset(preset) {
   } else if (preset === 'eoy') {
     target = new Date(today.getFullYear(), 11, 31);
   }
+
+  document.querySelectorAll('.forecast-preset-btn').forEach(btn => {
+    if (btn.getAttribute('data-preset') === preset) {
+      btn.className = "forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition";
+    } else {
+      btn.className = "forecast-preset-btn px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-400 hover:text-white transition";
+    }
+  });
 
   const y = target.getFullYear();
   const m = String(target.getMonth() + 1).padStart(2, '0');
@@ -772,7 +1030,7 @@ async function loadForecast() {
 
     const rangeLabel = document.getElementById("forecast-range-label");
     if (rangeLabel && forecastData.summary) {
-      rangeLabel.textContent = `${forecastData.summary.start_date} to ${forecastData.summary.target_date}`;
+      rangeLabel.textContent = `${forecastData.summary.start_date} → ${forecastData.summary.target_date}`;
     }
 
     renderForecastKPIs();
@@ -787,15 +1045,23 @@ async function loadForecast() {
 function renderForecastKPIs() {
   const sum = forecastData.summary;
 
-  // Header Nav Pill Today's Cash
+  // Sidebar / Header Nav Pill Today's Cash
   document.getElementById("nav-today-cash").textContent = formatCurrency(sum.starting_cash);
-  document.getElementById("nav-today-cash").className = `text-sm font-bold font-mono ${sum.starting_cash >= 0 ? "text-emerald-400" : "text-rose-400"}`;
+  document.getElementById("nav-today-cash").className = `text-sm font-extrabold font-mono ${sum.starting_cash >= 0 ? "text-emerald-400" : "text-rose-400"}`;
 
   // Target Date Stat Card
   const projEl = document.getElementById("stat-projected-cash");
   projEl.textContent = formatCurrency(sum.projected_cash_on_hand);
-  projEl.className = `text-2xl lg:text-3xl font-extrabold font-mono ${sum.projected_cash_on_hand >= 0 ? "text-emerald-400" : "text-rose-400"}`;
+  projEl.className = `text-2xl xl:text-3xl font-extrabold font-mono tracking-tight ${sum.projected_cash_on_hand >= 0 ? "text-emerald-400" : "text-rose-400"}`;
   document.getElementById("stat-target-date-label").textContent = `As of ${formatDate(sum.target_date)}`;
+
+  const deltaEl = document.getElementById("stat-projected-delta");
+  if (deltaEl) {
+    const diff = (sum.projected_cash_on_hand || 0) - (sum.starting_cash || 0);
+    const sign = diff >= 0 ? "+" : "";
+    deltaEl.textContent = `${sign}${formatCurrency(diff)} vs base`;
+    deltaEl.className = `text-[11px] font-mono ${diff >= 0 ? "text-emerald-400/90" : "text-rose-400/90"}`;
+  }
 
   const badgeEl = document.getElementById("stat-projected-badge");
   if (sum.projected_cash_on_hand >= 0) {
@@ -806,18 +1072,27 @@ function renderForecastKPIs() {
     badgeEl.className = "inline-flex text-[11px] font-semibold text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded-md w-max";
   }
 
-  // Net Flow
+  // Net Flow & Inflow/Outflow Bar
   const netEl = document.getElementById("stat-net-flow");
   netEl.textContent = formatCurrency(sum.net_cash_flow);
-  netEl.className = `text-xl font-bold font-mono ${sum.net_cash_flow >= 0 ? "text-emerald-400" : "text-rose-400"}`;
+  netEl.className = `text-2xl font-extrabold font-mono tracking-tight ${sum.net_cash_flow >= 0 ? "text-emerald-400" : "text-rose-400"}`;
   document.getElementById("stat-inflows").textContent = `+${formatCurrency(sum.total_inflows)}`;
   document.getElementById("stat-outflows").textContent = `-${formatCurrency(sum.total_outflows)}`;
   document.getElementById("stat-tx-count").textContent = `${forecastData.daily_timeline.reduce((acc, d) => acc + d.transaction_count, 0)} pending events`;
 
+  const barIn = document.getElementById("stat-flow-bar-in");
+  const barOut = document.getElementById("stat-flow-bar-out");
+  if (barIn && barOut) {
+    const totAbs = (Math.abs(sum.total_inflows) || 0) + (Math.abs(sum.total_outflows) || 0);
+    const inPct = totAbs > 0 ? Math.round((Math.abs(sum.total_inflows) / totAbs) * 100) : 50;
+    barIn.style.width = `${inPct}%`;
+    barOut.style.width = `${100 - inPct}%`;
+  }
+
   // Lowest Cash Dip
   const minCashEl = document.getElementById("stat-min-cash");
   minCashEl.textContent = formatCurrency(sum.min_cash_balance);
-  minCashEl.className = `text-xl font-bold font-mono ${sum.min_cash_balance >= 0 ? "text-white" : "text-rose-400"}`;
+  minCashEl.className = `text-2xl font-extrabold font-mono tracking-tight ${sum.min_cash_balance >= 0 ? "text-white" : "text-rose-400"}`;
   document.getElementById("stat-min-date").textContent = `on ${formatDate(sum.min_cash_date)}`;
 
   const dipBadge = document.getElementById("stat-dip-status");
@@ -835,7 +1110,7 @@ function renderForecastKPIs() {
   if (sum.hidden_accounts_count > 0) {
     hiddenBadge.classList.remove("hidden");
     hiddenBadge.classList.add("inline-flex");
-    hiddenText.textContent = `${sum.hidden_accounts_count} account${sum.hidden_accounts_count > 1 ? 's' : ''} excluded from calculations`;
+    hiddenText.textContent = `${sum.hidden_accounts_count} account${sum.hidden_accounts_count > 1 ? 's' : ''} excluded`;
   } else {
     hiddenBadge.classList.add("hidden");
     hiddenBadge.classList.remove("inline-flex");
@@ -848,7 +1123,7 @@ function renderForecastKPIs() {
     if (sum.settled_transactions_count > 0) {
       settledBadge.classList.remove("hidden");
       settledBadge.classList.add("inline-flex");
-      settledText.textContent = `${sum.settled_transactions_count} paid/received excluded from calculation`;
+      settledText.textContent = `${sum.settled_transactions_count} paid/received excluded`;
     } else {
       settledBadge.classList.add("hidden");
       settledBadge.classList.remove("inline-flex");
@@ -863,15 +1138,26 @@ function renderForecastChart() {
 
   const labels = timeline.map(d => d.date);
   const balances = timeline.map(d => d.cash_on_hand);
+  const hasDeficit = balances.some(b => b < 0);
+
+  const activeThemeKey = document.documentElement.getAttribute("data-theme") || "cyber";
+  const themeCfg = FUTURISTIC_THEMES[activeThemeKey] || FUTURISTIC_THEMES.cyber;
 
   if (chartInstance) {
     chartInstance.destroy();
   }
 
-  // Create gradient
-  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-  gradient.addColorStop(0, "rgba(16, 185, 129, 0.35)");
-  gradient.addColorStop(1, "rgba(16, 185, 129, 0.0)");
+  // Rich multi-stop vertical gradient synced with active futuristic theme
+  const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+  if (hasDeficit) {
+    gradient.addColorStop(0, themeCfg.gradTop);
+    gradient.addColorStop(0.65, "rgba(244, 63, 94, 0.16)");
+    gradient.addColorStop(1, "rgba(244, 63, 94, 0.02)");
+  } else {
+    gradient.addColorStop(0, themeCfg.gradTop);
+    gradient.addColorStop(0.55, themeCfg.gradMid);
+    gradient.addColorStop(1, themeCfg.gradBot);
+  }
 
   chartInstance = new Chart(ctx, {
     type: 'line',
@@ -881,20 +1167,22 @@ function renderForecastChart() {
         {
           label: 'Cash on Hand',
           data: balances,
-          borderColor: '#10b981',
+          borderColor: themeCfg.stroke,
           backgroundColor: gradient,
           fill: true,
-          tension: 0.25,
+          tension: 0.32,
           borderWidth: 2.5,
-          pointRadius: timeline.length > 60 ? 1 : 3,
+          pointRadius: timeline.length > 60 ? 0 : 2.5,
           pointHoverRadius: 6,
-          pointBackgroundColor: '#10b981'
+          pointBackgroundColor: themeCfg.stroke,
+          pointBorderColor: '#030612',
+          pointBorderWidth: 2
         },
         {
           label: 'Threshold ($0)',
           data: timeline.map(() => 0),
-          borderColor: 'rgba(244, 63, 94, 0.5)',
-          borderDash: [4, 4],
+          borderColor: 'rgba(244, 63, 94, 0.55)',
+          borderDash: [5, 5],
           borderWidth: 1.5,
           fill: false,
           pointRadius: 0
@@ -911,17 +1199,18 @@ function renderForecastChart() {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#020617',
-          borderColor: '#334155',
+          backgroundColor: 'rgba(4, 8, 20, 0.96)',
+          borderColor: themeCfg.tooltipBorder,
           borderWidth: 1,
-          padding: 12,
-          titleFont: { size: 12, weight: 'bold' },
+          padding: 14,
+          cornerRadius: 12,
+          titleFont: { size: 12, weight: 'bold', family: 'Inter' },
           bodyFont: { size: 12, family: 'JetBrains Mono' },
           callbacks: {
             title: (items) => formatDate(items[0].label),
             label: (item) => {
               if (item.datasetIndex === 0) {
-                return ` Cash on Hand: ${formatCurrency(item.raw)}`;
+                return ` Projected Cash: ${formatCurrency(item.raw)}`;
               }
               return null;
             },
@@ -1410,9 +1699,12 @@ async function bulkDeleteSelectedTransactions() {
   const ids = Array.from(selectedTxIds);
   if (ids.length === 0) return;
 
-  if (!confirm(`Are you sure you want to permanently delete ${ids.length} selected transaction${ids.length > 1 ? 's' : ''}?`)) {
-    return;
-  }
+  const confirmed = await askConfirm(
+    `Delete ${ids.length} Transaction${ids.length > 1 ? 's' : ''}?`,
+    `Are you sure you want to permanently delete ${ids.length} selected transaction${ids.length > 1 ? 's' : ''}?`,
+    `Delete ${ids.length} Transaction${ids.length > 1 ? 's' : ''}`
+  );
+  if (!confirmed) return;
 
   // Instant in-memory removal
   const idSet = new Set(ids);
@@ -1444,6 +1736,9 @@ function renderTransactionsTable() {
   countEl.textContent = showSettled
     ? `${transactions.length} transactions shown (including Paid / Received)`
     : `${transactions.length} pending transactions shown`;
+
+  const txBadge = document.getElementById("nav-badge-tx");
+  if (txBadge) txBadge.textContent = transactions.length;
 
   updateBulkActionBar();
 
@@ -1620,7 +1915,12 @@ async function submitTransactionForm() {
 }
 
 async function deleteTransaction(txId) {
-  if (!confirm(`Delete transaction #${txId}?`)) return;
+  const confirmed = await askConfirm(
+    `Delete Transaction #${txId}?`,
+    `Are you sure you want to delete transaction #${txId}?`,
+    `Delete Transaction`
+  );
+  if (!confirmed) return;
   try {
     const res = await fetch(`/api/transactions/${txId}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Delete failed");
@@ -1712,6 +2012,8 @@ async function loadRecurring() {
   try {
     const res = await fetch("/api/recurring");
     recurringRules = await res.json();
+    const recBadge = document.getElementById("nav-badge-rec");
+    if (recBadge) recBadge.textContent = (recurringRules || []).filter(r => r.active).length;
     renderRecurringTable();
   } catch (err) {
     console.error("Error loading recurring rules:", err);
@@ -1827,7 +2129,12 @@ async function submitRecurringForm() {
 }
 
 async function deleteRecurring(id) {
-  if (!confirm(`Delete recurring schedule and scheduled transactions?`)) return;
+  const confirmed = await askConfirm(
+    `Delete Recurring Schedule?`,
+    `Are you sure you want to delete this recurring schedule and remove its future scheduled occurrences?`,
+    `Delete Schedule`
+  );
+  if (!confirmed) return;
   try {
     const res = await fetch(`/api/recurring/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Delete failed");
@@ -2087,8 +2394,10 @@ async function commitFullImport() {
   const mode = modeRadio ? modeRadio.value : "merge";
 
   if (mode === "overwrite") {
-    const confirmOverwrite = confirm(
-      "⚠️ WARNING: Overwrite mode will CLEAR all current transactions and reset your accounts to match this workbook.\n\nAre you sure you want to proceed?"
+    const confirmOverwrite = await askConfirm(
+      "Overwrite Entire Database?",
+      "Overwrite mode will CLEAR all current transactions and reset your accounts to match this workbook. Are you sure you want to proceed?",
+      "Overwrite All Data"
     );
     if (!confirmOverwrite) return;
   }
@@ -2388,9 +2697,12 @@ async function bulkDeleteSelectedDetailTransactions() {
   const ids = Array.from(selectedDetailTxIds);
   if (ids.length === 0) return;
 
-  if (!confirm(`Are you sure you want to permanently delete ${ids.length} selected transaction${ids.length > 1 ? 's' : ''} from this account?`)) {
-    return;
-  }
+  const confirmed = await askConfirm(
+    `Delete ${ids.length} Transaction${ids.length > 1 ? 's' : ''}?`,
+    `Are you sure you want to permanently delete ${ids.length} selected transaction${ids.length > 1 ? 's' : ''} from this account?`,
+    `Delete ${ids.length} Transaction${ids.length > 1 ? 's' : ''}`
+  );
+  if (!confirmed) return;
 
   const idSet = new Set(ids);
   currentDetailTransactions = currentDetailTransactions.filter(t => !idSet.has(t.transaction_id));
@@ -2779,7 +3091,12 @@ async function submitQuickAddDetailTx(event) {
 }
 
 async function deleteDetailTransaction(txId) {
-  if (!confirm(`Delete transaction #${txId}?`)) return;
+  const confirmed = await askConfirm(
+    `Delete Transaction #${txId}?`,
+    `Are you sure you want to delete transaction #${txId} from this account?`,
+    `Delete Transaction`
+  );
+  if (!confirmed) return;
   try {
     const res = await fetch(`/api/transactions/${txId}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Delete failed");
@@ -2847,8 +3164,9 @@ function closeModal(id) {
 
 function getCategoryBadgeStyle(cat) {
   const c = (cat || "").toLowerCase();
-  if (c.includes("asset")) return "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
-  if (c.includes("revenue") || c.includes("income")) return "bg-teal-500/10 text-teal-300 border border-teal-500/20";
+  if (c.includes("asset") || c.includes("cash")) return "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
+  if (c.includes("receivable")) return "bg-teal-500/10 text-teal-300 border border-teal-500/20";
+  if (c.includes("revenue") || c.includes("income")) return "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20";
   if (c.includes("credit card")) return "bg-amber-500/10 text-amber-300 border border-amber-500/20";
   if (c.includes("loan") || c.includes("mortgage") || c.includes("installment")) return "bg-purple-500/10 text-purple-300 border border-purple-500/20";
   if (c.includes("subscription")) return "bg-sky-500/10 text-sky-300 border border-sky-500/20";
@@ -2866,4 +3184,185 @@ function escapeHtml(str) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[m]);
 }
+
+// --- Custom Glass Confirmation Modal ---
+function askConfirm(title, message, confirmLabel = "Confirm") {
+  return new Promise((resolve) => {
+    const modal = document.getElementById("modal-confirm");
+    if (!modal) {
+      resolve(window.confirm(message));
+      return;
+    }
+    document.getElementById("confirm-modal-title").textContent = title || "Confirm Action";
+    document.getElementById("confirm-modal-message").textContent = message || "Are you sure?";
+    const okBtn = document.getElementById("confirm-modal-ok");
+    const cancelBtn = document.getElementById("confirm-modal-cancel");
+    okBtn.textContent = confirmLabel;
+
+    const cleanup = (result) => {
+      modal.classList.add("hidden");
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      resolve(result);
+    };
+
+    okBtn.onclick = () => cleanup(true);
+    cancelBtn.onclick = () => cleanup(false);
+    modal.classList.remove("hidden");
+    lucide.createIcons();
+  });
+}
+
+// --- Global Command Palette (Ctrl+K / Cmd+K) ---
+let cmdPaletteItems = [];
+let cmdPaletteSelectedIndex = 0;
+
+function openCommandPalette() {
+  const modal = document.getElementById("modal-command-palette");
+  const input = document.getElementById("cmd-palette-input");
+  if (!modal || !input) return;
+  modal.classList.remove("hidden");
+  input.value = "";
+  cmdPaletteSelectedIndex = 0;
+  renderCommandPaletteResults();
+  setTimeout(() => input.focus(), 20);
+}
+
+function closeCommandPalette() {
+  const modal = document.getElementById("modal-command-palette");
+  if (modal) modal.classList.add("hidden");
+}
+
+function buildCommandPaletteCatalog(query) {
+  const q = (query || "").trim().toLowerCase();
+  const baseActions = [
+    { category: "Actions", icon: "plus-circle", label: "New Transaction Entry", hint: "Add income or expense", run: () => openModal('modal-add-transaction') },
+    { category: "Actions", icon: "folder-plus", label: "Create New Account", hint: "Auto-numbered chart of accounts", run: () => openAddAccountModalFromContext('accounts') },
+    { category: "Actions", icon: "repeat", label: "New Recurring Schedule", hint: "Paychecks, bills, subscriptions", run: () => openModal('modal-add-recurring') },
+    { category: "Actions", icon: "refresh-cw", label: "Recalculate All Balances", hint: "Sync reserves & projections", run: () => recalculateAllBalances().then(() => showToast("All balances recalculated")) },
+    { category: "Actions", icon: "settings", label: "Cash Forecast Settings", hint: "Base reserves & baseline date", run: () => openSettingsModal() },
+    { category: "Actions", icon: "download", label: "Export Full Ledger to Excel (.xlsx)", hint: "Download backup", run: () => exportTransactionsExcel() },
+    { category: "Navigation", icon: "line-chart", label: "Go to Cash Flow Forecast", hint: "Trajectory & daily accumulator", run: () => switchTab('forecast') },
+    { category: "Navigation", icon: "receipt", label: "Go to Transactions Ledger", hint: "Filter & bulk reconcile", run: () => switchTab('transactions') },
+    { category: "Navigation", icon: "layers", label: "Go to Chart of Accounts", hint: "Grouped & flat views", run: () => switchTab('accounts') },
+    { category: "Navigation", icon: "repeat", label: "Go to Recurring Rules", hint: "Manage active schedules", run: () => switchTab('recurring') },
+    { category: "Navigation", icon: "file-spreadsheet", label: "Go to Excel Import & Export", hint: "Upload .xlsx or .csv", run: () => switchTab('import') },
+    { category: "Forecast Horizon", icon: "calendar", label: "Forecast Horizon: +30 Days", hint: "Set target date", run: () => { switchTab('forecast'); setForecastPreset('30d'); } },
+    { category: "Forecast Horizon", icon: "calendar", label: "Forecast Horizon: +60 Days", hint: "Set target date", run: () => { switchTab('forecast'); setForecastPreset('60d'); } },
+    { category: "Forecast Horizon", icon: "calendar", label: "Forecast Horizon: +90 Days", hint: "Set target date", run: () => { switchTab('forecast'); setForecastPreset('90d'); } },
+    { category: "Forecast Horizon", icon: "calendar", label: "Forecast Horizon: End of Year", hint: "Set target date", run: () => { switchTab('forecast'); setForecastPreset('eoy'); } },
+    { category: "HUD Theme", icon: "sparkles", label: "Theme: Cyber Cyan & Electric Violet", hint: "Laser cyan + violet nebula", run: () => setFuturisticTheme('cyber') },
+    { category: "HUD Theme", icon: "sparkles", label: "Theme: Quantum Ultraviolet & Plasma", hint: "Neon violet + plasma magenta", run: () => setFuturisticTheme('quantum') },
+    { category: "HUD Theme", icon: "sparkles", label: "Theme: Solar Gold & Carbon Cyberpunk", hint: "Molten amber + tungsten obsidian", run: () => setFuturisticTheme('solar') },
+    { category: "HUD Theme", icon: "sparkles", label: "Theme: Bio-Neon Matrix Mint", hint: "Hyper-luminance mint + cyan", run: () => setFuturisticTheme('matrix') }
+  ];
+
+  const accountItems = (accounts || []).map(a => ({
+    category: "Accounts (Jump to Ledger)",
+    icon: "landmark",
+    label: `#${a.account_id} · ${a.account_name}`,
+    hint: `${a.type || 'Account'} · Net ${formatCurrency(a.total_amount || 0)}`,
+    run: () => openAccountDetail(a.account_id)
+  }));
+
+  const all = [...accountItems, ...baseActions];
+  if (!q) {
+    return [...baseActions.slice(0, 6), ...accountItems.slice(0, 12), ...baseActions.slice(6)];
+  }
+  return all.filter(item =>
+    item.label.toLowerCase().includes(q) ||
+    item.hint.toLowerCase().includes(q) ||
+    item.category.toLowerCase().includes(q)
+  );
+}
+
+function renderCommandPaletteResults() {
+  const input = document.getElementById("cmd-palette-input");
+  const container = document.getElementById("cmd-palette-results");
+  if (!container) return;
+
+  cmdPaletteItems = buildCommandPaletteCatalog(input ? input.value : "");
+  if (cmdPaletteSelectedIndex >= cmdPaletteItems.length) {
+    cmdPaletteSelectedIndex = 0;
+  }
+
+  if (cmdPaletteItems.length === 0) {
+    container.innerHTML = `<div class="py-8 text-center text-slate-500">No matching commands or accounts found.</div>`;
+    return;
+  }
+
+  container.innerHTML = cmdPaletteItems.map((item, idx) => {
+    const isSel = idx === cmdPaletteSelectedIndex;
+    return `
+      <button type="button" onclick="executeCommandPaletteItem(${idx})" onmouseenter="cmdPaletteSelectedIndex=${idx}; highlightCommandPaletteActive()" data-cmd-idx="${idx}" class="cmd-palette-row w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between transition ${isSel ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800/60 border border-transparent'}">
+        <div class="flex items-center space-x-3 min-w-0">
+          <i data-lucide="${item.icon}" class="w-4 h-4 ${isSel ? 'text-emerald-400' : 'text-slate-400'} shrink-0"></i>
+          <div class="truncate">
+            <div class="font-semibold text-xs ${isSel ? 'text-white' : 'text-slate-200'} truncate">${escapeHtml(item.label)}</div>
+            <div class="text-[10px] text-slate-500">${escapeHtml(item.category)}</div>
+          </div>
+        </div>
+        <span class="text-[11px] font-mono ${isSel ? 'text-emerald-300' : 'text-slate-400'} ml-3 shrink-0">${escapeHtml(item.hint)}</span>
+      </button>
+    `;
+  }).join("");
+  lucide.createIcons();
+}
+
+function highlightCommandPaletteActive() {
+  document.querySelectorAll(".cmd-palette-row").forEach((row, idx) => {
+    if (idx === cmdPaletteSelectedIndex) {
+      row.classList.add("bg-emerald-500/15", "text-emerald-300", "border-emerald-500/30");
+      row.classList.remove("border-transparent");
+      row.scrollIntoView({ block: "nearest" });
+    } else {
+      row.classList.remove("bg-emerald-500/15", "text-emerald-300", "border-emerald-500/30");
+      row.classList.add("border-transparent");
+    }
+  });
+}
+
+function executeCommandPaletteItem(idx) {
+  const item = cmdPaletteItems[idx];
+  closeCommandPalette();
+  if (item && typeof item.run === "function") {
+    item.run();
+  }
+}
+
+function handleCommandPaletteKeydown(e) {
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    if (cmdPaletteItems.length > 0) {
+      cmdPaletteSelectedIndex = (cmdPaletteSelectedIndex + 1) % cmdPaletteItems.length;
+      highlightCommandPaletteActive();
+    }
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    if (cmdPaletteItems.length > 0) {
+      cmdPaletteSelectedIndex = (cmdPaletteSelectedIndex - 1 + cmdPaletteItems.length) % cmdPaletteItems.length;
+      highlightCommandPaletteActive();
+    }
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    executeCommandPaletteItem(cmdPaletteSelectedIndex);
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    closeCommandPalette();
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault();
+    const modal = document.getElementById("modal-command-palette");
+    if (modal && !modal.classList.contains("hidden")) {
+      closeCommandPalette();
+    } else {
+      openCommandPalette();
+    }
+  } else if (e.key === "Escape") {
+    closeCommandPalette();
+  }
+});
 
