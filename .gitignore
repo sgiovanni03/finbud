@@ -127,3 +127,25 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# FinBud Personal Financial Data & Local Databases (NEVER COMMIT)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db.bak
+finbud.db*
+accounts.txt
+accounts_list.txt
+*.xlsx
+*.xls
+*.csv
+scratch/
+
+# Cloud & Secret Credentials
+.env
+.env.*
+*credentials*.json
+*service-account*.json
+gcp-key.json
