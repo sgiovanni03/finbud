@@ -110,6 +110,7 @@ jobs:
             --image "$IMAGE_URI" \
             --region ${{ env.GCP_REGION }} \
             --platform managed \
+            --service-account "github-cd@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com" \
             --allow-unauthenticated \
             --max-instances 1 \
             --memory 512Mi \
