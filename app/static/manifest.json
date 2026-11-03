@@ -1,0 +1,19 @@
+{
+  "name": "FinBud — Cash Flow & Forecast Vault",
+  "short_name": "FinBud",
+  "description": "Real-time cash flow forecasting, multi-account ledger, and recurring schedule accumulator.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#030612",
+  "theme_color": "#030612",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

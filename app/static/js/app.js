@@ -184,34 +184,77 @@ async function loadCurrentUser() {
     const res = await fetch("/api/auth/me");
     if (!res.ok) return;
     const me = await res.json();
-    const nameEl = document.getElementById("user-display-name");
-    const emailEl = document.getElementById("user-email-label");
-    const badgeEl = document.getElementById("user-vault-badge");
-    const avatarBox = document.getElementById("user-avatar-box");
-    const actionBtn = document.getElementById("user-auth-action-btn");
 
-    if (nameEl) nameEl.textContent = me.name || "User";
-    if (emailEl) emailEl.textContent = me.email || "";
-    if (badgeEl) badgeEl.textContent = me.vault_label || "Vault";
+    const targets = [
+      {
+        nameEl: document.getElementById("user-display-name"),
+        emailEl: document.getElementById("user-email-label"),
+        badgeEl: document.getElementById("user-vault-badge"),
+        avatarBox: document.getElementById("user-avatar-box"),
+        actionBtn: document.getElementById("user-auth-action-btn"),
+        actionLabel: null
+      },
+      {
+        nameEl: document.getElementById("mob-user-display-name"),
+        emailEl: document.getElementById("mob-user-email-label"),
+        badgeEl: document.getElementById("mob-user-vault-badge"),
+        avatarBox: document.getElementById("mob-user-avatar-box"),
+        actionBtn: document.getElementById("mob-user-auth-action-btn"),
+        actionLabel: document.getElementById("mob-user-auth-label")
+      }
+    ];
 
-    if (me.authenticated) {
-      if (avatarBox) {
-        if (me.avatar) {
-          avatarBox.innerHTML = `<img src="${escapeHtml(me.avatar)}" alt="" class="w-full h-full object-cover">`;
-        } else {
-          const initials = (me.name || me.email || "U").trim().slice(0, 2).toUpperCase();
-          avatarBox.textContent = initials;
+    targets.forEach(t => {
+      if (t.nameEl) t.nameEl.textContent = me.name || "User";
+      if (t.emailEl) t.emailEl.textContent = me.email || "";
+      if (t.badgeEl) t.badgeEl.textContent = me.vault_label || "Vault";
+
+      if (me.authenticated) {
+        if (t.avatarBox) {
+          if (me.avatar) {
+            t.avatarBox.innerHTML = `<img src="${escapeHtml(me.avatar)}" alt="" class="w-full h-full object-cover">`;
+          } else {
+            const initials = (me.name || me.email || "U").trim().slice(0, 2).toUpperCase();
+            t.avatarBox.textContent = initials;
+          }
+        }
+        if (t.actionBtn) {
+          t.actionBtn.href = "/logout";
+          t.actionBtn.title = "Sign Out / Switch Vault";
+          if (t.actionLabel) {
+            t.actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>Sign Out</span>`;
+          } else {
+            t.actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i>`;
+          }
         }
       }
-      if (actionBtn) {
-        actionBtn.href = "/logout";
-        actionBtn.title = "Sign Out / Switch Vault";
-        actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i>`;
-      }
-    }
+    });
   } catch (e) {
     console.error("Failed to load user profile:", e);
   }
+}
+
+function openMobileDrawer() {
+  const drawer = document.getElementById("modal-mobile-drawer");
+  if (!drawer) return;
+  const todayCash = document.getElementById("nav-today-cash");
+  const baseRes = document.getElementById("nav-base-reserves");
+  const mobToday = document.getElementById("mob-nav-today-cash");
+  const mobBase = document.getElementById("mob-nav-base-reserves");
+  if (todayCash && mobToday) {
+    mobToday.textContent = todayCash.textContent;
+    mobToday.className = `text-base font-extrabold font-mono mt-0.5 block ${todayCash.textContent.startsWith("-") ? "text-rose-400" : "text-emerald-400"}`;
+  }
+  if (baseRes && mobBase) {
+    mobBase.textContent = baseRes.textContent;
+  }
+  drawer.classList.remove("hidden");
+  lucide.createIcons();
+}
+
+function closeMobileDrawer() {
+  const drawer = document.getElementById("modal-mobile-drawer");
+  if (drawer) drawer.classList.add("hidden");
 }
 
 // Tab Switching & Header Context
@@ -1048,6 +1091,11 @@ function renderForecastKPIs() {
   // Sidebar / Header Nav Pill Today's Cash
   document.getElementById("nav-today-cash").textContent = formatCurrency(sum.starting_cash);
   document.getElementById("nav-today-cash").className = `text-sm font-extrabold font-mono ${sum.starting_cash >= 0 ? "text-emerald-400" : "text-rose-400"}`;
+  const mobTodayEl = document.getElementById("mob-nav-today-cash");
+  if (mobTodayEl) {
+    mobTodayEl.textContent = formatCurrency(sum.starting_cash);
+    mobTodayEl.className = `text-base font-extrabold font-mono mt-0.5 block ${sum.starting_cash >= 0 ? "text-emerald-400" : "text-rose-400"}`;
+  }
 
   // Target Date Stat Card
   const projEl = document.getElementById("stat-projected-cash");

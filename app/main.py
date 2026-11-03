@@ -131,6 +131,7 @@ PUBLIC_PATHS = {
     "/register",
     "/logout",
     "/healthz",
+    "/favicon.ico",
     "/auth/google/login",
     "/auth/google/callback",
 }
@@ -548,6 +549,14 @@ if not os.path.exists(STATIC_DIR):
     os.makedirs(STATIC_DIR, exist_ok=True)
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+@app.get("/favicon.ico", include_in_schema=False)
+def serve_favicon():
+    icon_path = os.path.join(STATIC_DIR, "icon.svg")
+    if os.path.exists(icon_path):
+        return FileResponse(icon_path, media_type="image/svg+xml")
+    return Response(status_code=204)
+
 
 @app.get("/")
 def serve_index():
