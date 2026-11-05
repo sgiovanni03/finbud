@@ -4,6 +4,7 @@ import html
 import hashlib
 import secrets
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query, Response, Request, Form
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response, HTMLResponse, RedirectResponse, JSONResponse
 from typing import Optional, List, Dict, Any
@@ -73,6 +74,7 @@ from app.models import (
 )
 
 app = FastAPI(title="FinBud - Financial Buddy API", version="1.0.0")
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 def _get_expected_auth_token() -> Optional[str]:
     pwd = os.environ.get("FINBUD_ACCESS_PASSWORD", "").strip()
@@ -161,10 +163,12 @@ async def auth_and_tenant_isolation_middleware(request: Request, call_next):
     finally:
         reset_current_tenant_db(token)
 
-    if path.startswith("/static/") or path == "/":
+    if path == "/":
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
+    elif path.startswith("/static/"):
+        response.headers["Cache-Control"] = "public, max-age=3600"
     return response
 
 
@@ -571,6 +575,64 @@ def serve_index():
             }
         )
     return {"message": "FinBud API is running. Web UI not found in static directory."}
+
+# --- Single-Round-Trip Bootstrap Endpoint ---
+
+@app.get("/api/bootstrap")
+def api_bootstrap(
+    request: Request,
+    target_date: Optional[str] = Query(None),
+    start_date: Optional[str] = Query(None),
+    include_recurring: bool = Query(True),
+    tx_status: Optional[str] = Query("pending"),
+    tx_order_by: str = Query("date"),
+    tx_order_dir: str = Query("asc"),
+):
+    me_data = api_get_current_user(request)
+    settings_data = get_all_settings()
+    accounts_data = get_all_accounts()
+    cash_accounts = [
+        {
+            "account_id": a["account_id"],
+            "account_name": a["account_name"],
+            "type": a["type"],
+            "starting_balance": a["starting_balance"],
+            "is_hidden": a.get("is_hidden", 0),
+        }
+        for a in accounts_data
+        if str(a.get("type", "")).lower() == "cash"
+    ]
+    total_active_cash = round(
+        sum(float(a["starting_balance"] or 0.0) for a in cash_accounts if not a.get("is_hidden")),
+        2,
+    )
+    forecast_data = calculate_cash_projection(
+        start_date_str=start_date,
+        target_date_str=target_date,
+        include_recurring=include_recurring,
+        include_hidden=False,
+    )
+    transactions_data = get_transactions(
+        status=tx_status,
+        order_by=tx_order_by,
+        order_dir=tx_order_dir,
+        limit=5000,
+    )
+    recurring_data = get_recurring_rules()
+    return {
+        "me": me_data,
+        "settings": settings_data,
+        "accounts": accounts_data,
+        "cash_summary": {
+            "total_cash_reserves": total_active_cash,
+            "accounts": cash_accounts,
+            "count": len(cash_accounts),
+        },
+        "forecast": forecast_data,
+        "transactions": transactions_data,
+        "recurring": recurring_data,
+    }
+
 
 # --- Accounts Endpoints ---
 

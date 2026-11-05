@@ -10,7 +10,7 @@ import urllib.parse
 import urllib.request
 from typing import Optional, Dict, Any
 
-from app.database import DB_PATH
+from app.database import DB_PATH, open_fast_sqlite_connection
 
 DATA_DIR = os.path.dirname(os.path.abspath(DB_PATH))
 TENANTS_DIR = os.path.join(DATA_DIR, "tenants")
@@ -46,15 +46,14 @@ def _get_secret_key() -> bytes:
 
 
 _auth_db_initialized: set = set()
+_user_count_cache: Dict[str, int] = {}
 
 
 def get_auth_db() -> sqlite3.Connection:
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(TENANTS_DIR, exist_ok=True)
     abs_auth_path = os.path.abspath(AUTH_DB_PATH)
-    os.makedirs(os.path.dirname(abs_auth_path), exist_ok=True)
-    conn = sqlite3.connect(abs_auth_path)
-    conn.row_factory = sqlite3.Row
+    conn = open_fast_sqlite_connection(abs_auth_path)
     if abs_auth_path not in _auth_db_initialized:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -174,10 +173,15 @@ def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:
 
 
 def count_users() -> int:
+    abs_auth_path = os.path.abspath(AUTH_DB_PATH)
+    if abs_auth_path in _user_count_cache and _user_count_cache[abs_auth_path] > 0:
+        return _user_count_cache[abs_auth_path]
     conn = get_auth_db()
     row = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()
     conn.close()
-    return int(row["c"]) if row else 0
+    cnt = int(row["c"]) if row else 0
+    _user_count_cache[abs_auth_path] = cnt
+    return cnt
 
 
 def create_user(
@@ -223,6 +227,7 @@ def create_user(
     conn.commit()
     row = cur.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     conn.close()
+    _user_count_cache.pop(os.path.abspath(AUTH_DB_PATH), None)
     return dict(row)
 
 

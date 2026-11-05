@@ -11,6 +11,25 @@ let previewRecords = [];
 let txSearchTimeout = null;
 let selectedTxIds = new Set();
 
+// Coalesce Lucide icon scans into a single animation-frame pass to eliminate DOM thrashing
+let _lucideRafPending = false;
+const _origLucideCreateIcons = (typeof lucide !== "undefined" && lucide.createIcons)
+  ? lucide.createIcons.bind(lucide)
+  : null;
+if (_origLucideCreateIcons) {
+  lucide.createIcons = function(opts) {
+    if (opts && opts.root) {
+      return _origLucideCreateIcons(opts);
+    }
+    if (_lucideRafPending) return;
+    _lucideRafPending = true;
+    requestAnimationFrame(() => {
+      _lucideRafPending = false;
+      _origLucideCreateIcons();
+    });
+  };
+}
+
 // Global Date Picker: Click anywhere on any date input to immediately open the dropdown calendar
 document.addEventListener("click", (e) => {
   const dateInput = e.target.closest('input[type="date"]');
@@ -164,73 +183,176 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Setup dropzone
   setupDropZone();
 
-  // Load initial data and initialize sorting indicators
+  // Load initial data in a single GZip-compressed round-trip (/api/bootstrap)
   updateTxSortUI();
   updateAccountsSortUI();
   updateRecurringSortUI();
   updateDailySortUI();
-  await loadCurrentUser();
-  await loadSettings();
-  await loadAccounts();
-  await loadForecast();
-  await loadTransactions();
-  await loadRecurring();
+  await loadBootstrap();
 
   lucide.createIcons();
 });
+
+function applyCurrentUserPayload(me) {
+  if (!me) return;
+  const targets = [
+    {
+      nameEl: document.getElementById("user-display-name"),
+      emailEl: document.getElementById("user-email-label"),
+      badgeEl: document.getElementById("user-vault-badge"),
+      avatarBox: document.getElementById("user-avatar-box"),
+      actionBtn: document.getElementById("user-auth-action-btn"),
+      actionLabel: null
+    },
+    {
+      nameEl: document.getElementById("mob-user-display-name"),
+      emailEl: document.getElementById("mob-user-email-label"),
+      badgeEl: document.getElementById("mob-user-vault-badge"),
+      avatarBox: document.getElementById("mob-user-avatar-box"),
+      actionBtn: document.getElementById("mob-user-auth-action-btn"),
+      actionLabel: document.getElementById("mob-user-auth-label")
+    }
+  ];
+
+  targets.forEach(t => {
+    if (t.nameEl) t.nameEl.textContent = me.name || "User";
+    if (t.emailEl) t.emailEl.textContent = me.email || "";
+    if (t.badgeEl) t.badgeEl.textContent = me.vault_label || "Vault";
+
+    if (me.authenticated) {
+      if (t.avatarBox) {
+        if (me.avatar) {
+          t.avatarBox.innerHTML = `<img src="${escapeHtml(me.avatar)}" alt="" class="w-full h-full object-cover">`;
+        } else {
+          const initials = (me.name || me.email || "U").trim().slice(0, 2).toUpperCase();
+          t.avatarBox.textContent = initials;
+        }
+      }
+      if (t.actionBtn) {
+        t.actionBtn.href = "/logout";
+        t.actionBtn.title = "Sign Out / Switch Vault";
+        if (t.actionLabel) {
+          t.actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>Sign Out</span>`;
+        } else {
+          t.actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i>`;
+        }
+      }
+    }
+  });
+}
 
 async function loadCurrentUser() {
   try {
     const res = await fetch("/api/auth/me");
     if (!res.ok) return;
     const me = await res.json();
-
-    const targets = [
-      {
-        nameEl: document.getElementById("user-display-name"),
-        emailEl: document.getElementById("user-email-label"),
-        badgeEl: document.getElementById("user-vault-badge"),
-        avatarBox: document.getElementById("user-avatar-box"),
-        actionBtn: document.getElementById("user-auth-action-btn"),
-        actionLabel: null
-      },
-      {
-        nameEl: document.getElementById("mob-user-display-name"),
-        emailEl: document.getElementById("mob-user-email-label"),
-        badgeEl: document.getElementById("mob-user-vault-badge"),
-        avatarBox: document.getElementById("mob-user-avatar-box"),
-        actionBtn: document.getElementById("mob-user-auth-action-btn"),
-        actionLabel: document.getElementById("mob-user-auth-label")
-      }
-    ];
-
-    targets.forEach(t => {
-      if (t.nameEl) t.nameEl.textContent = me.name || "User";
-      if (t.emailEl) t.emailEl.textContent = me.email || "";
-      if (t.badgeEl) t.badgeEl.textContent = me.vault_label || "Vault";
-
-      if (me.authenticated) {
-        if (t.avatarBox) {
-          if (me.avatar) {
-            t.avatarBox.innerHTML = `<img src="${escapeHtml(me.avatar)}" alt="" class="w-full h-full object-cover">`;
-          } else {
-            const initials = (me.name || me.email || "U").trim().slice(0, 2).toUpperCase();
-            t.avatarBox.textContent = initials;
-          }
-        }
-        if (t.actionBtn) {
-          t.actionBtn.href = "/logout";
-          t.actionBtn.title = "Sign Out / Switch Vault";
-          if (t.actionLabel) {
-            t.actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>Sign Out</span>`;
-          } else {
-            t.actionBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i>`;
-          }
-        }
-      }
-    });
+    applyCurrentUserPayload(me);
   } catch (e) {
     console.error("Failed to load user profile:", e);
+  }
+}
+
+async function loadBootstrap() {
+  try {
+    const targetDate = document.getElementById("forecast-target-date")?.value || "";
+    const startInput = document.getElementById("forecast-start-date");
+    const startDate = (typeof isForecastStartCustom !== "undefined" && isForecastStartCustom && startInput) ? startInput.value : "";
+    const includeRecurring = document.getElementById("forecast-include-recurring")?.checked ?? true;
+    const showSettled = document.getElementById("tx-show-settled")?.checked || false;
+
+    const params = new URLSearchParams();
+    if (targetDate) params.append("target_date", targetDate);
+    if (startDate) params.append("start_date", startDate);
+    params.append("include_recurring", includeRecurring);
+    params.append("tx_status", showSettled ? "" : "pending");
+    params.append("tx_order_by", txSortBy || "date");
+    params.append("tx_order_dir", txSortDir || "asc");
+
+    const res = await fetch(`/api/bootstrap?${params.toString()}`);
+    if (!res.ok) throw new Error("Bootstrap failed");
+    const data = await res.json();
+
+    // 1. User Profile
+    if (data.me) applyCurrentUserPayload(data.me);
+
+    // 2. Settings + Reserves
+    settings = data.settings || {};
+    const baseReserves = parseFloat(settings.base_cash_reserves || 0);
+    const autoCalc = settings.auto_calculate_reserves !== "false";
+    const autoCalcCheckbox = document.getElementById("settings-auto-calc-reserves");
+    if (autoCalcCheckbox) autoCalcCheckbox.checked = autoCalc;
+    const baseResInput = document.getElementById("settings-base-reserves");
+    if (baseResInput) baseResInput.value = baseReserves.toFixed(2);
+    const baseDateInput = document.getElementById("settings-base-date");
+    if (baseDateInput) baseDateInput.value = settings.base_date || "2026-09-29";
+    toggleAutoCalcReservesUI();
+
+    if (data.cash_summary) {
+      const effectiveTotal = autoCalc ? data.cash_summary.total_cash_reserves : baseReserves;
+      const navBase = document.getElementById("nav-base-reserves");
+      if (navBase) navBase.textContent = formatCurrency(effectiveTotal);
+      const mobBase = document.getElementById("mob-nav-base-reserves");
+      if (mobBase) mobBase.textContent = formatCurrency(effectiveTotal);
+      const bannerTotal = document.getElementById("accounts-banner-total");
+      if (bannerTotal) bannerTotal.textContent = formatCurrency(data.cash_summary.total_cash_reserves);
+    }
+
+    // 3. Accounts
+    accounts = data.accounts || [];
+    const txSelect = document.getElementById("tx-form-account");
+    const filterSelect = document.getElementById("tx-filter-account");
+    const recSelect = document.getElementById("rec-form-account");
+    const currentFilterVal = filterSelect ? filterSelect.value : "";
+    const optionsHtml = accounts.map(a => `<option value="${a.account_id}">${a.account_id} - ${a.account_name} (${a.type})</option>`).join("");
+    if (txSelect) txSelect.innerHTML = optionsHtml;
+    if (recSelect) recSelect.innerHTML = optionsHtml;
+    if (filterSelect) {
+      filterSelect.innerHTML = `<option value="">All Accounts</option>` + optionsHtml;
+      filterSelect.value = currentFilterVal;
+    }
+    const accBadge = document.getElementById("nav-badge-acc");
+    if (accBadge) accBadge.textContent = accounts.length;
+    renderAccountsTable();
+    updateAccBulkActionBar();
+
+    // 4. Forecast
+    forecastData = data.forecast;
+    if (forecastData && forecastData.summary) {
+      if (startInput && (!isForecastStartCustom || !startInput.value) && forecastData.summary.start_date) {
+        startInput.value = forecastData.summary.start_date;
+      }
+      const rangeLabel = document.getElementById("forecast-range-label");
+      if (rangeLabel) {
+        rangeLabel.textContent = `${forecastData.summary.start_date} → ${forecastData.summary.target_date}`;
+      }
+      renderForecastKPIs();
+      renderForecastChart();
+      renderDailyLedgerTable();
+    }
+
+    // 5. Transactions
+    transactions = data.transactions || [];
+    const txBadge = document.getElementById("nav-badge-tx");
+    if (txBadge) txBadge.textContent = transactions.filter(t => (t.status || 'pending') === 'pending').length;
+    sortTransactionsInMemory();
+    renderTransactionsTable();
+    updateBulkActionBar();
+
+    // 6. Recurring
+    recurringRules = data.recurring || [];
+    const recBadge = document.getElementById("nav-badge-rec");
+    if (recBadge) recBadge.textContent = recurringRules.filter(r => r.active).length;
+    renderRecurringTable();
+  } catch (err) {
+    console.warn("Bootstrap fallback to parallel load:", err);
+    await Promise.all([
+      loadCurrentUser(),
+      loadSettings(),
+      loadAccounts(),
+      loadForecast(),
+      loadTransactions(),
+      loadRecurring()
+    ]);
   }
 }
 
@@ -468,12 +590,7 @@ function openAddAccountModalFromContext(context = 'accounts') {
 
 async function recalculateAllBalances() {
   try {
-    await Promise.all([
-      loadSettings(),
-      loadAccounts(),
-      loadForecast(),
-      loadTransactions()
-    ]);
+    await loadBootstrap();
     if (typeof currentDetailAccountId !== 'undefined' && currentDetailAccountId) {
       await loadAccountDetail(currentDetailAccountId);
     }
@@ -506,15 +623,18 @@ async function loadAccounts() {
     filterSelect.innerHTML = `<option value="">All Accounts</option>` + optionsHtml;
     filterSelect.value = currentFilterVal;
 
-    // Update Cash Reserves banner
-    const cashSummaryRes = await fetch("/api/accounts/cash-summary");
-    if (cashSummaryRes.ok) {
-      const cashData = await cashSummaryRes.json();
-      const bannerTotal = document.getElementById("accounts-banner-total");
-      if (bannerTotal) bannerTotal.textContent = formatCurrency(cashData.total_cash_reserves);
-      if (settings.auto_calculate_reserves !== "false") {
-        document.getElementById("nav-base-reserves").textContent = formatCurrency(cashData.total_cash_reserves);
-      }
+    // Compute Cash Reserves directly from loaded accounts (zero extra network trip)
+    const totalCashReserves = round2(
+      accounts
+        .filter(a => String(a.type || "").toLowerCase() === "cash" && !a.is_hidden)
+        .reduce((sum, a) => sum + (parseFloat(a.starting_balance) || 0), 0)
+    );
+    const bannerTotal = document.getElementById("accounts-banner-total");
+    if (bannerTotal) bannerTotal.textContent = formatCurrency(totalCashReserves);
+    if (settings.auto_calculate_reserves !== "false") {
+      document.getElementById("nav-base-reserves").textContent = formatCurrency(totalCashReserves);
+      const mobBase = document.getElementById("mob-nav-base-reserves");
+      if (mobBase) mobBase.textContent = formatCurrency(totalCashReserves);
     }
 
     // Update sidebar badge
@@ -1413,7 +1533,6 @@ function toggleSortTx(col) {
   updateTxSortUI();
   sortTransactionsInMemory();
   renderTransactionsTable();
-  loadTransactions();
 }
 
 function onSelectSortTx(val) {
@@ -1421,7 +1540,6 @@ function onSelectSortTx(val) {
   updateTxSortUI();
   sortTransactionsInMemory();
   renderTransactionsTable();
-  loadTransactions();
 }
 
 function toggleSortDir() {
@@ -1429,7 +1547,6 @@ function toggleSortDir() {
   updateTxSortUI();
   sortTransactionsInMemory();
   renderTransactionsTable();
-  loadTransactions();
 }
 
 function updateTxSortUI() {

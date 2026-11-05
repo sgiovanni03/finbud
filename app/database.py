@@ -1,6 +1,9 @@
 import sqlite3
 import os
 import re
+import shutil
+import tempfile
+import threading
 from contextvars import ContextVar
 from typing import List, Dict, Any, Optional, Set
 from datetime import datetime, date, timedelta
@@ -15,6 +18,72 @@ ACCOUNTS_TXT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath
 # Per-request isolated tenant database path (defaults to primary DB_PATH)
 current_db_path_var: ContextVar[str] = ContextVar("current_db_path", default=DB_PATH)
 _initialized_db_paths: Set[str] = set()
+_ram_sync_lock = threading.Lock()
+RAM_CACHE_ROOT = os.path.join(tempfile.gettempdir(), "finbud_ram_cache")
+
+
+def _should_use_ram_cache(abs_path: str) -> bool:
+    """
+    Use in-memory /tmp write-through caching automatically when the database
+    is stored on a Cloud Run GCS FUSE mount (/mnt/...) so reads execute in <1ms
+    from RAM instead of making network round-trips over FUSE.
+    """
+    normalized = abs_path.replace("\\", "/")
+    if os.environ.get("FINBUD_DISABLE_RAM_CACHE", "").strip().lower() in ("1", "true", "yes"):
+        return False
+    return normalized.startswith("/mnt/")
+
+
+def _get_ram_cache_path(persistent_abs_path: str) -> str:
+    rel = persistent_abs_path.replace("\\", "/").lstrip("/")
+    return os.path.join(RAM_CACHE_ROOT, rel)
+
+
+class WriteThroughConnection(sqlite3.Connection):
+    """
+    SQLite connection wrapper that executes against a fast local /tmp RAM file
+    and flushes back to the persistent GCS FUSE path only when a write occurs.
+    """
+    def _bind_paths(self, ram_path: str, persistent_path: str, newly_created: bool):
+        self._ram_path = ram_path
+        self._persistent_path = persistent_path
+        self._initial_changes = self.total_changes
+        self._needs_flush = newly_created
+
+    def commit(self):
+        super().commit()
+        if self._persistent_path and (self._needs_flush or self.total_changes > self._initial_changes):
+            with _ram_sync_lock:
+                os.makedirs(os.path.dirname(self._persistent_path), exist_ok=True)
+                shutil.copy2(self._ram_path, self._persistent_path)
+            self._initial_changes = self.total_changes
+            self._needs_flush = False
+
+
+def open_fast_sqlite_connection(target_path: str) -> sqlite3.Connection:
+    abs_target = os.path.abspath(target_path)
+    os.makedirs(os.path.dirname(abs_target), exist_ok=True)
+
+    if _should_use_ram_cache(abs_target):
+        ram_path = _get_ram_cache_path(abs_target)
+        os.makedirs(os.path.dirname(ram_path), exist_ok=True)
+        newly_created = False
+        with _ram_sync_lock:
+            if not os.path.exists(ram_path):
+                if os.path.exists(abs_target) and os.path.getsize(abs_target) > 0:
+                    shutil.copy2(abs_target, ram_path)
+                else:
+                    newly_created = True
+        conn = sqlite3.connect(ram_path, factory=WriteThroughConnection, timeout=15.0)
+        conn._bind_paths(ram_path, abs_target, newly_created)
+    else:
+        conn = sqlite3.connect(abs_target, timeout=15.0)
+
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON;")
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA temp_store = MEMORY;")
+    return conn
 
 
 def set_current_tenant_db(db_path: str):
@@ -31,16 +100,12 @@ def get_active_db_path() -> str:
 
 def get_db():
     active_path = get_active_db_path()
-    os.makedirs(os.path.dirname(os.path.abspath(active_path)), exist_ok=True)
-    conn = sqlite3.connect(active_path)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
-    return conn
+    return open_fast_sqlite_connection(active_path)
 
 
 def ensure_tenant_db_initialized(db_path: Optional[str] = None):
     target = os.path.abspath(db_path or get_active_db_path())
-    if target in _initialized_db_paths and os.path.exists(target):
+    if target in _initialized_db_paths:
         return
     token = set_current_tenant_db(target)
     try:
@@ -153,14 +218,20 @@ def init_db():
     for k, v in defaults.items():
         cur.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (k, v))
 
-    # 5. Backfill accounts from accounts.txt if accounts have missing types or new accounts exist
+    # 5. Ensure fast lookup indexes for transactions and recurring rules
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_tx_date ON transactions(transaction_date);")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_tx_account ON transactions(account_id);")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_tx_status ON transactions(status);")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_tx_rule ON transactions(recurring_rule_id);")
+
+    # 6. Backfill accounts from accounts.txt if accounts have missing types or new accounts exist
     if os.path.exists(ACCOUNTS_TXT_PATH):
         _backfill_accounts_from_file(cur, ACCOUNTS_TXT_PATH)
 
     conn.commit()
     conn.close()
 
-    # 6. Ensure all active recurring rules have transactions materialized in ledger
+    # 7. Ensure all active recurring rules have transactions materialized in ledger
     sync_all_active_recurring_rules()
 
 def _backfill_accounts_from_file(cur, filepath):
