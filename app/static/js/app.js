@@ -10,6 +10,10 @@ let onlyActivityDays = false;
 let previewRecords = [];
 let txSearchTimeout = null;
 let selectedTxIds = new Set();
+let activeTab = 'forecast';
+let dirtyTabs = new Set(['accounts', 'transactions', 'recurring']);
+let txLoadedOnce = false;
+let recLoadedOnce = false;
 
 // Coalesce Lucide icon scans into a single animation-frame pass to eliminate DOM thrashing
 let _lucideRafPending = false;
@@ -183,14 +187,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Setup dropzone
   setupDropZone();
 
-  // Load initial data in a single GZip-compressed round-trip (/api/bootstrap)
+  // Load critical visible view (Forecast + Accounts) immediately in parallel
   updateTxSortUI();
   updateAccountsSortUI();
   updateRecurringSortUI();
   updateDailySortUI();
-  await loadBootstrap();
+  await Promise.all([
+    loadCurrentUser(),
+    loadSettings(),
+    loadAccounts(),
+    loadForecast()
+  ]);
 
   lucide.createIcons();
+
+  // Prefetch secondary ledger & recurring data non-blockingly in the background
+  setTimeout(() => {
+    loadTransactions();
+    loadRecurring();
+  }, 100);
 });
 
 function applyCurrentUserPayload(me) {
@@ -390,6 +405,7 @@ const VIEW_META = {
 };
 
 function switchTab(tabName) {
+  activeTab = tabName;
   const tabs = ['forecast', 'transactions', 'accounts', 'account-detail', 'recurring', 'import'];
   tabs.forEach(t => {
     const view = document.getElementById(`view-${t}`);
@@ -415,9 +431,9 @@ function switchTab(tabName) {
     }
     if (mobBtn) {
       if (isActive) {
-        mobBtn.className = "flex flex-col items-center py-1 px-3 rounded-xl text-emerald-400 bg-emerald-500/10";
+        mobBtn.className = "flex flex-col items-center py-1 px-2.5 rounded-xl text-emerald-400 bg-emerald-500/10";
       } else {
-        mobBtn.className = "flex flex-col items-center py-1 px-3 rounded-xl text-slate-400 hover:text-slate-200";
+        mobBtn.className = "flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-200";
       }
     }
   });
@@ -427,6 +443,26 @@ function switchTab(tabName) {
   const subEl = document.getElementById("header-view-subtitle");
   if (titleEl) titleEl.textContent = meta.title;
   if (subEl) subEl.textContent = meta.subtitle;
+
+  // Render deferred table if user switches to a tab that was updated in background
+  if (tabName === 'accounts' && dirtyTabs.has('accounts')) {
+    dirtyTabs.delete('accounts');
+    renderAccountsTable();
+  } else if (tabName === 'transactions') {
+    if (!txLoadedOnce) {
+      loadTransactions();
+    } else if (dirtyTabs.has('transactions')) {
+      dirtyTabs.delete('transactions');
+      renderTransactionsTable();
+    }
+  } else if (tabName === 'recurring') {
+    if (!recLoadedOnce) {
+      loadRecurring();
+    } else if (dirtyTabs.has('recurring')) {
+      dirtyTabs.delete('recurring');
+      renderRecurringTable();
+    }
+  }
 
   if (tabName === 'forecast' && chartInstance) {
     chartInstance.resize();
@@ -448,15 +484,10 @@ async function loadSettings() {
     document.getElementById("settings-base-date").value = settings.base_date || "2026-09-29";
 
     toggleAutoCalcReservesUI();
-
-    // Fetch cash summary to show exact auto-calculated total in nav and banner
-    const cashRes = await fetch("/api/accounts/cash-summary");
-    if (cashRes.ok) {
-      const cashData = await cashRes.json();
-      const effectiveTotal = autoCalc ? cashData.total_cash_reserves : baseReserves;
-      document.getElementById("nav-base-reserves").textContent = formatCurrency(effectiveTotal);
-      const bannerTotal = document.getElementById("accounts-banner-total");
-      if (bannerTotal) bannerTotal.textContent = formatCurrency(cashData.total_cash_reserves);
+    if (!autoCalc) {
+      document.getElementById("nav-base-reserves").textContent = formatCurrency(baseReserves);
+      const mobBase = document.getElementById("mob-nav-base-reserves");
+      if (mobBase) mobBase.textContent = formatCurrency(baseReserves);
     }
   } catch (err) {
     console.error("Error loading settings:", err);
@@ -590,10 +621,17 @@ function openAddAccountModalFromContext(context = 'accounts') {
 
 async function recalculateAllBalances() {
   try {
-    await loadBootstrap();
-    if (typeof currentDetailAccountId !== 'undefined' && currentDetailAccountId) {
-      await loadAccountDetail(currentDetailAccountId);
+    const tasks = [loadAccounts(), loadForecast()];
+    if (activeTab === 'transactions') {
+      tasks.push(loadTransactions());
+    } else {
+      txLoadedOnce = false;
+      dirtyTabs.add('transactions');
     }
+    if (typeof currentDetailAccountId !== 'undefined' && currentDetailAccountId && activeTab === 'account-detail') {
+      tasks.push(loadAccountDetail(currentDetailAccountId));
+    }
+    await Promise.all(tasks);
   } catch (err) {
     console.error("Error in recalculateAllBalances:", err);
   }
@@ -641,7 +679,12 @@ async function loadAccounts() {
     const accBadge = document.getElementById("nav-badge-acc");
     if (accBadge) accBadge.textContent = accounts.length;
 
-    renderAccountsTable();
+    if (activeTab === 'accounts') {
+      dirtyTabs.delete('accounts');
+      renderAccountsTable();
+    } else {
+      dirtyTabs.add('accounts');
+    }
     updateAccBulkActionBar();
   } catch (err) {
     console.error("Error loading accounts:", err);
@@ -1662,7 +1705,15 @@ async function loadTransactions() {
   try {
     const res = await fetch(`/api/transactions?${params.toString()}`);
     transactions = await res.json();
-    renderTransactionsTable();
+    txLoadedOnce = true;
+    const txBadge = document.getElementById("nav-badge-tx");
+    if (txBadge) txBadge.textContent = transactions.filter(t => (t.status || 'pending') === 'pending').length;
+    if (activeTab === 'transactions') {
+      dirtyTabs.delete('transactions');
+      renderTransactionsTable();
+    } else {
+      dirtyTabs.add('transactions');
+    }
   } catch (err) {
     console.error("Error loading transactions:", err);
   }
@@ -2177,9 +2228,15 @@ async function loadRecurring() {
   try {
     const res = await fetch("/api/recurring");
     recurringRules = await res.json();
+    recLoadedOnce = true;
     const recBadge = document.getElementById("nav-badge-rec");
     if (recBadge) recBadge.textContent = (recurringRules || []).filter(r => r.active).length;
-    renderRecurringTable();
+    if (activeTab === 'recurring') {
+      dirtyTabs.delete('recurring');
+      renderRecurringTable();
+    } else {
+      dirtyTabs.add('recurring');
+    }
   } catch (err) {
     console.error("Error loading recurring rules:", err);
   }

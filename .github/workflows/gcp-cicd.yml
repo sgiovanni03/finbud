@@ -118,6 +118,7 @@ jobs:
             --max-instances 1 \
             --memory 512Mi \
             --cpu 1 \
+            --cpu-boost \
             --execution-environment gen2 \
             --add-volume=name=finbud-data,type=cloud-storage,bucket=${{ secrets.GCP_STORAGE_BUCKET }} \
             --add-volume-mount=volume=finbud-data,mount-path=/mnt/data \

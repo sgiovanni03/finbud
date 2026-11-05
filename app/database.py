@@ -18,15 +18,16 @@ ACCOUNTS_TXT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath
 # Per-request isolated tenant database path (defaults to primary DB_PATH)
 current_db_path_var: ContextVar[str] = ContextVar("current_db_path", default=DB_PATH)
 _initialized_db_paths: Set[str] = set()
+_ram_ready_paths: Set[str] = set()
 _ram_sync_lock = threading.Lock()
 RAM_CACHE_ROOT = os.path.join(tempfile.gettempdir(), "finbud_ram_cache")
 
 
 def _should_use_ram_cache(abs_path: str) -> bool:
     """
-    Use in-memory /tmp write-through caching automatically when the database
-    is stored on a Cloud Run GCS FUSE mount (/mnt/...) so reads execute in <1ms
-    from RAM instead of making network round-trips over FUSE.
+    Use in-memory /tmp caching automatically when the database is stored on a
+    Cloud Run GCS FUSE mount (/mnt/...) so reads and commits execute in <1ms
+    from RAM instead of waiting on FUSE network round-trips.
     """
     normalized = abs_path.replace("\\", "/")
     if os.environ.get("FINBUD_DISABLE_RAM_CACHE", "").strip().lower() in ("1", "true", "yes"):
@@ -39,10 +40,22 @@ def _get_ram_cache_path(persistent_abs_path: str) -> str:
     return os.path.join(RAM_CACHE_ROOT, rel)
 
 
+def _flush_ram_to_persistent_async(ram_path: str, persistent_path: str) -> None:
+    def _worker():
+        try:
+            with _ram_sync_lock:
+                os.makedirs(os.path.dirname(persistent_path), exist_ok=True)
+                shutil.copyfile(ram_path, persistent_path)
+        except Exception:
+            pass
+
+    threading.Thread(target=_worker, daemon=True).start()
+
+
 class WriteThroughConnection(sqlite3.Connection):
     """
     SQLite connection wrapper that executes against a fast local /tmp RAM file
-    and flushes back to the persistent GCS FUSE path only when a write occurs.
+    and flushes back to the persistent GCS FUSE path asynchronously on write.
     """
     def _bind_paths(self, ram_path: str, persistent_path: str, newly_created: bool):
         self._ram_path = ram_path
@@ -53,30 +66,32 @@ class WriteThroughConnection(sqlite3.Connection):
     def commit(self):
         super().commit()
         if self._persistent_path and (self._needs_flush or self.total_changes > self._initial_changes):
-            with _ram_sync_lock:
-                os.makedirs(os.path.dirname(self._persistent_path), exist_ok=True)
-                shutil.copy2(self._ram_path, self._persistent_path)
             self._initial_changes = self.total_changes
             self._needs_flush = False
+            _flush_ram_to_persistent_async(self._ram_path, self._persistent_path)
 
 
 def open_fast_sqlite_connection(target_path: str) -> sqlite3.Connection:
     abs_target = os.path.abspath(target_path)
-    os.makedirs(os.path.dirname(abs_target), exist_ok=True)
 
     if _should_use_ram_cache(abs_target):
         ram_path = _get_ram_cache_path(abs_target)
-        os.makedirs(os.path.dirname(ram_path), exist_ok=True)
         newly_created = False
-        with _ram_sync_lock:
-            if not os.path.exists(ram_path):
-                if os.path.exists(abs_target) and os.path.getsize(abs_target) > 0:
-                    shutil.copy2(abs_target, ram_path)
-                else:
-                    newly_created = True
+        if abs_target not in _ram_ready_paths:
+            os.makedirs(os.path.dirname(ram_path), exist_ok=True)
+            with _ram_sync_lock:
+                if not os.path.exists(ram_path):
+                    if os.path.exists(abs_target) and os.path.getsize(abs_target) > 0:
+                        shutil.copyfile(abs_target, ram_path)
+                    else:
+                        newly_created = True
+                _ram_ready_paths.add(abs_target)
         conn = sqlite3.connect(ram_path, factory=WriteThroughConnection, timeout=15.0)
         conn._bind_paths(ram_path, abs_target, newly_created)
     else:
+        if abs_target not in _ram_ready_paths:
+            os.makedirs(os.path.dirname(abs_target), exist_ok=True)
+            _ram_ready_paths.add(abs_target)
         conn = sqlite3.connect(abs_target, timeout=15.0)
 
     conn.row_factory = sqlite3.Row
