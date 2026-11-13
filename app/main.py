@@ -56,13 +56,6 @@ from app.auth import (
     exchange_google_code_for_profile,
 )
 from app.cash_engine import calculate_cash_projection, get_cash_on_hand_at_date
-from app.excel_service import (
-    parse_workbook,
-    commit_full_import,
-    parse_transactions_file,
-    generate_sample_excel_template,
-    export_transactions_to_excel
-)
 from app.models import (
     AccountCreate,
     AccountUpdate,
@@ -916,12 +909,14 @@ class ImportCommitRequest(BaseModel):
 
 @app.post("/api/import/preview")
 async def api_import_preview(file: UploadFile = File(...)):
+    from app.excel_service import parse_workbook
     contents = await file.read()
     result = parse_workbook(contents, file.filename)
     return result
 
 @app.post("/api/import/commit-full")
 def api_import_commit_full(req: FullWorkbookCommitRequest):
+    from app.excel_service import commit_full_import
     try:
         res = commit_full_import(
             mode=req.mode,
@@ -965,6 +960,7 @@ def api_import_commit(req: ImportCommitRequest):
 
 @app.get("/api/export/transactions")
 def api_export_transactions():
+    from app.excel_service import export_transactions_to_excel
     txs = get_transactions(limit=100000)
     excel_bytes = export_transactions_to_excel(txs)
     return Response(
@@ -975,6 +971,7 @@ def api_export_transactions():
 
 @app.get("/api/template/excel")
 def api_download_template():
+    from app.excel_service import generate_sample_excel_template
     excel_bytes = generate_sample_excel_template()
     return Response(
         content=excel_bytes,

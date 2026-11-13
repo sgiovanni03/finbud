@@ -1719,6 +1719,14 @@ async function loadTransactions() {
   }
 }
 
+const SVG_CHECK = `<svg class="w-3.5 h-3.5 text-emerald-400 group-hover:text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+const SVG_CHECK_CIRCLE = `<svg class="w-3.5 h-3.5 text-teal-400 group-hover:text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>`;
+const SVG_PAID_CIRCLE = `<svg class="w-3.5 h-3.5 text-emerald-400 group-hover:text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>`;
+const SVG_RCVD_CIRCLE = `<svg class="w-3.5 h-3.5 text-teal-400 group-hover:text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`;
+const SVG_EDIT = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg>`;
+const SVG_TRASH = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
+const SVG_REPEAT = `<svg class="w-3 h-3 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>`;
+
 function renderTxStatusBadge(tx) {
   const status = (tx.status || "pending").toLowerCase();
   const amt = parseFloat(tx.transaction_amount) || 0;
@@ -1729,14 +1737,14 @@ function renderTxStatusBadge(tx) {
     if (isExpense) {
       return `
         <button type="button" onclick="toggleTxStatus(${tx.transaction_id})" class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500 hover:text-slate-950 border border-emerald-500/30 hover:border-emerald-500 transition shadow-sm group" title="Pending expense. Click to Mark as Paid">
-          <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 group-hover:text-slate-950"></i>
+          ${SVG_CHECK}
           <span>Mark as Paid</span>
         </button>
       `;
     } else {
       return `
         <button type="button" onclick="toggleTxStatus(${tx.transaction_id})" class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal-500/15 text-teal-300 hover:bg-teal-500 hover:text-slate-950 border border-teal-500/30 hover:border-teal-500 transition shadow-sm group" title="Pending income. Click to Mark as Received">
-          <i data-lucide="check-circle" class="w-3.5 h-3.5 text-teal-400 group-hover:text-slate-950"></i>
+          ${SVG_CHECK_CIRCLE}
           <span>Mark as Received</span>
         </button>
       `;
@@ -1746,7 +1754,7 @@ function renderTxStatusBadge(tx) {
     if (isExpense) {
       return `
         <button type="button" onclick="toggleTxStatus(${tx.transaction_id})" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 hover:bg-slate-800 hover:text-amber-300 border border-emerald-500/40 hover:border-amber-500/40 transition group" title="Status: Paid! Click to undo back to Pending">
-          <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400 group-hover:text-amber-400"></i>
+          ${SVG_PAID_CIRCLE}
           <span>Paid</span>
           <span class="text-[10px] text-slate-400 group-hover:text-amber-300 ml-0.5 opacity-0 group-hover:opacity-100 transition">(undo)</span>
         </button>
@@ -1754,7 +1762,7 @@ function renderTxStatusBadge(tx) {
     } else {
       return `
         <button type="button" onclick="toggleTxStatus(${tx.transaction_id})" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal-500/20 text-teal-300 hover:bg-slate-800 hover:text-amber-300 border border-teal-500/40 hover:border-amber-500/40 transition group" title="Status: Received! Click to undo back to Pending">
-          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-teal-400 group-hover:text-amber-400"></i>
+          ${SVG_RCVD_CIRCLE}
           <span>Received</span>
           <span class="text-[10px] text-slate-400 group-hover:text-amber-300 ml-0.5 opacity-0 group-hover:opacity-100 transition">(undo)</span>
         </button>
@@ -1945,13 +1953,26 @@ async function bulkDeleteSelectedTransactions() {
   }
 }
 
+let txRenderLimit = 100;
+
+function showMoreTransactions(step = 200) {
+  txRenderLimit += step;
+  renderTransactionsTable();
+}
+
+function showAllTransactions() {
+  txRenderLimit = transactions.length;
+  renderTransactionsTable();
+}
+
 function renderTransactionsTable() {
   const tbody = document.getElementById("tx-table-tbody");
   const countEl = document.getElementById("tx-table-count");
   const showSettled = document.getElementById("tx-show-settled")?.checked || false;
+  const visibleRows = transactions.slice(0, txRenderLimit);
   countEl.textContent = showSettled
-    ? `${transactions.length} transactions shown (including Paid / Received)`
-    : `${transactions.length} pending transactions shown`;
+    ? `Showing ${visibleRows.length} of ${transactions.length} transactions (including Paid / Received)`
+    : `Showing ${visibleRows.length} of ${transactions.length} pending transactions`;
 
   const txBadge = document.getElementById("nav-badge-tx");
   if (txBadge) txBadge.textContent = transactions.length;
@@ -1963,7 +1984,7 @@ function renderTransactionsTable() {
     return;
   }
 
-  tbody.innerHTML = transactions.map(t => {
+  let rowsHtml = visibleRows.map(t => {
     const isIncome = t.transaction_amount >= 0;
     const isSettled = (t.status || "pending").toLowerCase() !== "pending";
     const isSelected = selectedTxIds.has(t.transaction_id);
@@ -1977,7 +1998,7 @@ function renderTransactionsTable() {
       ? `<span class="inline-flex items-center text-[10px] font-sans px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 ml-1.5" title="Account is excluded from cash calculations">Excluded</span>`
       : "";
     const recurringBadge = t.recurring_rule_id
-      ? `<span class="inline-flex items-center text-[10px] font-sans px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30 ml-1.5" title="Recurring Rule #${t.recurring_rule_id}"><i data-lucide="repeat" class="w-3 h-3 mr-0.5"></i>Recurring</span>`
+      ? `<span class="inline-flex items-center text-[10px] font-sans px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30 ml-1.5" title="Recurring Rule #${t.recurring_rule_id}">${SVG_REPEAT}Recurring</span>`
       : "";
 
     return `
@@ -2010,16 +2031,36 @@ function renderTransactionsTable() {
         </td>
         <td class="py-2.5 px-4 text-right space-x-1 whitespace-nowrap">
           <button onclick="editTransaction(${t.transaction_id})" class="text-slate-400 hover:text-emerald-400 p-1">
-            <i data-lucide="edit-3" class="w-4 h-4"></i>
+            ${SVG_EDIT}
           </button>
           <button onclick="deleteTransaction(${t.transaction_id})" class="text-slate-400 hover:text-rose-400 p-1">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            ${SVG_TRASH}
           </button>
         </td>
       </tr>
     `;
   }).join("");
-  lucide.createIcons();
+
+  if (transactions.length > visibleRows.length) {
+    const remaining = transactions.length - visibleRows.length;
+    rowsHtml += `
+      <tr>
+        <td colspan="8" class="py-4 px-4 text-center bg-slate-950/50">
+          <div class="flex flex-wrap items-center justify-center gap-2 font-sans text-xs">
+            <span class="text-slate-400">${remaining} more entries not yet rendered</span>
+            <button type="button" onclick="showMoreTransactions(200)" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold border border-emerald-500/30 transition">
+              Load Next 200
+            </button>
+            <button type="button" onclick="showAllTransactions()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium border border-slate-700 transition">
+              Show All (${transactions.length})
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  tbody.innerHTML = rowsHtml;
 }
 
 let txAmountSign = -1; // default expense

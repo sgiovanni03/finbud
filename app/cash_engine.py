@@ -169,14 +169,13 @@ def calculate_cash_projection(
     Computes daily cash on hand trajectory and key summary metrics from
     start_date to target_date, excluding accounts flagged as hidden/excluded.
     """
-    settings = get_all_settings()
+    conn = get_db()
+    cur = conn.cursor()
+    settings = {r["key"]: r["value"] for r in cur.execute("SELECT key, value FROM settings").fetchall()}
     base_date_str = settings.get("base_date", "2022-01-01")
     base_date = parse_date(base_date_str)
 
     today = date.today()
-
-    conn = get_db()
-    cur = conn.cursor()
 
     inc_hidden_flag = 1 if include_hidden else 0
 
@@ -365,11 +364,10 @@ def get_cash_on_hand_at_date(target_date_str: str, include_hidden: bool = False)
     excluding hidden accounts (unless include_hidden is True) and excluding transactions
     already marked as Paid or Received.
     """
-    settings = get_all_settings()
-    base_date_str = settings.get("base_date", "2022-01-01")
-
     conn = get_db()
     cur = conn.cursor()
+    settings = {r["key"]: r["value"] for r in cur.execute("SELECT key, value FROM settings").fetchall()}
+    base_date_str = settings.get("base_date", "2022-01-01")
 
     inc_hidden_flag = 1 if include_hidden else 0
 
